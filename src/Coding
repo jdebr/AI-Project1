@@ -1,19 +1,50 @@
 if __name__ == "__main__":
 	import random
+	import math
 	graphX = []
 	graphY = []
-	for i in range(1,10):
-		x = random.randint(1,50)
-		y = random.randint(51,100)
-		graphX.append(x)
-		graphY.append(y)
-	print("X coordinates are - ")
-	print(graphX)
-	print("Y coordinates are - ")
-	print(graphY)
-	graph = {}
-	for i in range(1,20):
-		graph[random.choice(graphX)] = random.choice(graphY),random.choice(graphX)
-	print(graph)
-	#I just thought to do some stuff and join points randomly.
-	#Waiting o hear for input and errors
+	n = int(input("Enter value of n from 10 - 100 in multiples of 10"))
+	if n%10 == 0:
+		for i in range(n):
+		    x = random.randrange(1,100)
+		    y = random.randrange(101,200)
+		    graphX.append(x)
+		    graphY.append(y)
+		print("X coordinates are - ")
+		print(graphX)
+		print("Y coordinates are - ")
+		print(graphY)
+		graph = {}
+		for i in range(0,10):
+		    print(i)
+		    graph[i] = [random.choice(graphX),random.choice(graphY)]
+		distanceList = []
+		print(graph)
+		graph2 = {}
+		for key, value in graph.items():
+			x1Coordinate = value[0]
+			y1Coordinate = value[1]
+			x1 = x1Coordinate
+			y1 = y1Coordinate
+			tempDistance = None
+			print(x1)
+			print(y1)
+			for key, value in graph.items():
+				x2Coordinate = value[0]
+				y2Coordinate = value[1]
+				x = (x2Coordinate - x1Coordinate)**2
+				y = (y2Coordinate - y1Coordinate)**2
+				print (x)
+				print (y)
+				print("-----------------")
+				finalDistance = math.sqrt(x+y)
+				print(finalDistance)
+				if finalDistance == 0:
+					print ("Same Points")
+				elif tempDistance == None:
+					tempDistance = finalDistance
+				elif(tempDistance > finalDistance):
+					tempDistance = finalDistance
+			graph2[tempDistance] = [x1,y1,x2,y2]
+			print("Temp Distance is " + str(tempDistance))
+		print(graph2)
