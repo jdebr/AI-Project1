@@ -11,6 +11,7 @@ Project 1
 import random
 import math
 from collections import defaultdict
+import matplotlib.pyplot as py
 
 
 # Represents an undirected graph.  Key is node ID, value is a list of           
@@ -73,6 +74,9 @@ def main():
         print(key, value)
         
     print(distance)
+    
+    py.plot([4,5,6])
+    py.show()
     
     
 if __name__ == '__main__':
