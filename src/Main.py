@@ -9,40 +9,71 @@ Project 1
 '''
 
 import random
+import math
+from collections import defaultdict
 
-class Vertex(object):
-    def __init__(self, x, y, color = None):
-        self.x = x
-        self.y = y
-        self.color = color
-        
-    def set_color(self, color):
-        self.color = color 
-        
-    def to_string(self):
-        print("Position (x,y): (" + str(self.x) + ", " + str(self.y) + ")")
-        print("Color: " + str(self.color))
-        
-def generate_graph(n):
+
+# Represents an undirected graph.  Key is node ID, value is a list of           
+# node IDs that share an edge.
+# {nodeID: [nodeIDs...]}
+graph = {}
+
+
+# Maps node ID to some color value
+# {nodeID: 'color'}
+color = {}
+
+
+# Maps node ID to a tuple representing Cartesian coordinates
+# {nodeID: (x, y)}
+coords = {}
+
+
+# Maps node ID to a list of tuples which represent NodeID and distance 
+# {nodeID: [(nodeID, distance)...]}  
+distance = defaultdict(list)
+
+
+def generate_points(n):
+    ''' Generates n sets of points randomly scattered on the 
+    unit square and stores them as tuples mapped to integer IDs
     '''
-    Generate a random undirected graph with n vertices, 
-    return a dictionary of vertices representing graph
-    '''
-    graph = {}
-    
     for i in range(n):
-        randX = random.random()
-        randY = random.random()
-        v = Vertex(randX, randY)
-        graph[i] = v 
+        randX = random.randint(1, 10)
+        randY = random.randint(1, 10)
+        v = (randX, randY)
+        coords[i] = v 
         
-    return graph
+
+def calculate_distances():
+    ''' Calculates distances between each pair of points,
+    storing as a dictionary of lists of tuples, then sorting
+    the lists by distance
+    '''
+    for i in range(len(coords)):
+        for j in range(i + 1, len(coords)):
+            # Calculate distance from i to j, 
+            # store in both distances[i] and distances[j]
+            delta_x = coords[i][0] - coords[j][0]
+            delta_y = coords[i][1] - coords[j][1]
+            d = math.sqrt(pow(delta_x, 2) + pow(delta_y, 2))
+            distance[i].append((j, d))
+            distance[j].append((i, d)) 
+            
+    # Sort each list of tuples by distance
+    for k, v in distance.items():
+        v.sort(key=lambda d: d[1])
+        
         
 def main():
-    g = generate_graph(5)
+    generate_points(5)
+    calculate_distances()
     
-    for key, value in g.items():
-        value.to_string()
+    for key, value in coords.items():
+        print(key, value)
+        
+    print(distance)
+    
     
 if __name__ == '__main__':
     main()
