@@ -21,32 +21,56 @@ if __name__ == "__main__":
 		distanceList = []
 		print(graph)
 		graph2 = {}
+		#
+		#
 		for key, value in graph.items():
+			print("start Again of Loop")
 			x1Coordinate = value[0]
 			y1Coordinate = value[1]
 			x1 = x1Coordinate
 			y1 = y1Coordinate
 			tempDistance = None
-			print(x1)
-			print(y1)
+			print ("None should be = " + str(tempDistance))
+			print("X1 Coordinates" + str(x1))
+			print("Y1 Coordinates" + str(y1))
 			for key, value in graph.items():
 				x2Coordinate = value[0]
 				y2Coordinate = value[1]
-				x = (x2Coordinate - x1Coordinate)**2
-				y = (y2Coordinate - y1Coordinate)**2
-				print (x)
-				print (y)
-				print("-----------------")
-				finalDistance = math.sqrt(x+y)
-				print(finalDistance)
-				if finalDistance == 0:
-					print ("Same Points")
-				elif tempDistance == None:
-					tempDistance = finalDistance
-				elif(tempDistance > finalDistance):
-					tempDistance = finalDistance
-			graph2[tempDistance] = [x1,y1,x2,y2]
-			print("Temp Distance is " + str(tempDistance))
+				if x1Coordinate == x2Coordinate and y1Coordinate == y2Coordinate:
+					print("++++++++++++++++++")
+					print("They are same Coordinates")
+					print(x1Coordinate)
+					print(y1Coordinate)
+					print(x2Coordinate)
+					print(y2Coordinate)
+					print("+++++++++++++++++++")
+				else:	
+					x = (x2Coordinate - x1Coordinate)**2
+					y = (y2Coordinate - y1Coordinate)**2
+					#print (x)
+					#print (y)
+					print("-----------------")
+					finalDistance = math.sqrt(x+y)
+					print(finalDistance)
+					print("-----------------")
+					if tempDistance == None:
+						print("Can't Compare")
+						tempDistance = finalDistance
+					elif finalDistance > tempDistance:
+						shortDistance = tempDistance
+						x2 = x2Coordinate
+						y2 = y2Coordinate
+						print("******************************")
+						print(x1,y1,x2,y2,shortDistance)
+						print("******************************")
+					elif finalDistance < tempDistance:
+						shortDistance = finalDistance
+						tempDistance = finalDistance
+						x2 = x2Coordinate
+						y2 = y2Coordinate
+						print("______________________________")
+						print(x1,y1,x2,y2,shortDistance)
+						print("______________________________")
+			graph2[shortDistance] = [x1,y1,x2,y2]
+			#print("Temp Distance is " + str(tempDistance))
 		print(graph2)
-#Working in it
-#feel free to change but mention what changed so i get to know my mistakes and thing not to work on 
