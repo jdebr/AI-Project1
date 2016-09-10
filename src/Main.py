@@ -108,77 +108,82 @@ def draw_graph():
                     y2 = pt2[1]
                     
                     # Check if vertical line, might need to handle differently?
-                    #if x1 == x2:
-                    #    print("Vertical line!")
-                    #    pass
+                    if x1 == x2:
+                        print("Vertical line!")
+                        pass
                     # Check if this line will intersect any other edges in graph
-                    #else:
-                    # Calculate values for line Ax + By = C
-                    A1 = y2 - y1
-                    B1 = x1 - x2
-                    C1 = A1 * x1 + B1 * y1
-                    # If no edges on graph then no conflict, so add this as first edge
-                    if not lines:
-                        graph[selected_point].append(nearest_point)
-                        lines.append((A1, B1, C1, x1, y1, x2, y2))
-                        lineAdded = True
-                    # Check all other edges for potential intersection
                     else:
-                        intersection_found = False
-                        
-                        for line in lines:
-                            # Retrieve pre-calculated line information
-                            A2 = line[0]
-                            B2 = line[1]
-                            C2 = line[2]
-                            x3 = line[3]
-                            y3 = line[4]
-                            x4 = line[5]
-                            y4 = line[6]
-                            
-                            # Calculate determinant of system
-                            det = (A1 * B2) - (A2 * B1)
-                            if det == 0:
-                                #lines are parallel
-                                if x1 == x3 or x1 == x4 and x2 == x3 or x2 == x4:
-                                    #lines are the same...this shouldn't happen now
-                                    print("Same Line!")
-                                    intersection_found = True
-                                elif (x1 > min(x3, x4) and x1 < max(x3, x4)
-                                        or x2 > min(x3, x4) and x2 < max(x3, x4)
-                                        or x3 > min(x1, x2) and x3 < max(x1, x2)
-                                        or x4 > min(x1, x2) and x4 < max(x1, x2)):
-                                    # Parallel lines overlap and thus intersect
-                                    print("Parallel Overlap!")
-                                    intersection_found = True
-                                else:
-                                    # Parallel lines don't overlap so we are ok
-                                    pass
-                            # Calculate point of intersection
-                            else:
-                                x = (B2 * C1 - B1 * C2) / det
-                                y = (A1 * C2 - A2 * C1) / det
-                                
-                                # Check if on segment 1
-                                if x > min(x1, x2) and x < max(x1, x2):
-                                    if y > min(y1, y2) and y < max(y1, y2):
-                                        # Check if on segment 2
-                                        if x > min(x3, x4) and x < max(x3, x4):
-                                            if y > min(y3, y4) and y < max(y3, y4):
-                                                # this will intersect so move on
-                                                print("Intersection!")
-                                                intersection_found = True
-                                                break
-                                            
-                        # No intersection so add edge and line
-                        if not intersection_found:
+                        # Calculate values for line Ax + By = C
+                        A1 = y2 - y1
+                        B1 = x1 - x2
+                        C1 = A1 * x1 + B1 * y1
+                        # If no edges on graph then no conflict, so add this as first edge
+                        if not lines:
                             graph[selected_point].append(nearest_point)
                             lines.append((A1, B1, C1, x1, y1, x2, y2))
                             lineAdded = True
-
+                        # Check all other edges for potential intersection
+                        else:
+                            intersection_found = False
+                            
+                            for line in lines:
+                                # Retrieve pre-calculated line information
+                                A2 = line[0]
+                                B2 = line[1]
+                                C2 = line[2]
+                                x3 = line[3]
+                                y3 = line[4]
+                                x4 = line[5]
+                                y4 = line[6]
+                                
+                                # Calculate determinant of system
+                                det = (A1 * B2) - (A2 * B1)
+                                if det == 0:
+                                    #lines are parallel
+                                    if x1 == x3 or x1 == x4 and x2 == x3 or x2 == x4:
+                                        #lines are the same...this shouldn't happen now
+                                        print("Same Line!")
+                                        intersection_found = True
+                                    elif (x1 > min(x3, x4) and x1 < max(x3, x4)
+                                            or x2 > min(x3, x4) and x2 < max(x3, x4)
+                                            or x3 > min(x1, x2) and x3 < max(x1, x2)
+                                            or x4 > min(x1, x2) and x4 < max(x1, x2)):
+                                        # Parallel lines overlap and thus intersect
+                                        print("Parallel Overlap!")
+                                        intersection_found = True
+                                    else:
+                                        # Parallel lines don't overlap so we are ok
+                                        pass
+                                # Calculate point of intersection
+                                else:
+                                    x = (B2 * C1 - B1 * C2) / det
+                                    y = (A1 * C2 - A2 * C1) / det
+                                    
+                                    # Check if on segment 1
+                                    if x > min(x1, x2) and x < max(x1, x2):
+                                        if y > min(y1, y2) and y < max(y1, y2):
+                                            # Check if on segment 2
+                                            if x > min(x3, x4) and x < max(x3, x4):
+                                                if y > min(y3, y4) and y < max(y3, y4):
+                                                    # this will intersect so move on
+                                                    print("Intersection!")
+                                                    intersection_found = True
+                                                    break
+                                                
+                            # No intersection so add edge and line
+                            if not intersection_found:
+                                graph[selected_point].append(nearest_point)
+                                lines.append((A1, B1, C1, x1, y1, x2, y2))
+                                lineAdded = True
+    
         
 def main():
-    generate_points(3)
+    # Vertical Lines test
+    coords[0] = (5, 0)
+    coords[1] = (5, 10)
+    coords[2] = (5, 15)
+    
+    #generate_points(10)
     for key, value in coords.items():
         print(key, value)
         
