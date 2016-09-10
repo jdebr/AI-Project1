@@ -140,8 +140,11 @@ def draw_graph():
                             det = (A1 * B2) - (A2 * B1)
                             if det == 0:
                                 #lines are parallel, handle differently?
-                                print("Parallel!")
-                                pass
+                                if A1 + A2 == 0 and B1 + B2 == 0 and C1 + C2 == 0:
+                                    print("Same Line")
+                                    intersection_found = True
+                                else:
+                                    print("Parallel!")
                             # Calculate point of intersection
                             else:
                                 x = (B2 * C1 - B1 * C2) / det
@@ -174,7 +177,7 @@ def main():
     #print(distance)
     
     draw_graph()
-    print(lines)
+    #print(lines)
     
     for key, value in graph.items():
         print("Node " + str(key) + " connected to nodes: " + str(value))
