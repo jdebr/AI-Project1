@@ -98,7 +98,7 @@ def draw_graph():
                 distance[selected_point].pop(0)
                 
                 # if no edge already exists between these points, calculate line equation
-                if nearest_point not in graph[selected_point]:
+                if nearest_point not in graph[selected_point] and selected_point not in graph[nearest_point]:
                     # set coordinates for calculation
                     pt1 = coords[selected_point]
                     pt2 = coords[nearest_point]
@@ -139,12 +139,21 @@ def draw_graph():
                             # Calculate determinant of system
                             det = (A1 * B2) - (A2 * B1)
                             if det == 0:
-                                #lines are parallel, handle differently?
-                                if A1 + A2 == 0 and B1 + B2 == 0 and C1 + C2 == 0:
-                                    print("Same Line")
+                                #lines are parallel
+                                if x1 == x3 or x1 == x4 and x2 == x3 or x2 == x4:
+                                    #lines are the same...this shouldn't happen now
+                                    print("Same Line!")
+                                    intersection_found = True
+                                elif (x1 > min(x3, x4) and x1 < max(x3, x4)
+                                        or x2 > min(x3, x4) and x2 < max(x3, x4)
+                                        or x3 > min(x1, x2) and x3 < max(x1, x2)
+                                        or x4 > min(x1, x2) and x4 < max(x1, x2)):
+                                    # Parallel lines overlap and thus intersect
+                                    print("Parallel Overlap!")
                                     intersection_found = True
                                 else:
-                                    print("Parallel!")
+                                    # Parallel lines don't overlap so we are ok
+                                    pass
                             # Calculate point of intersection
                             else:
                                 x = (B2 * C1 - B1 * C2) / det
