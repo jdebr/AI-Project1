@@ -14,29 +14,31 @@ from collections import defaultdict
 import matplotlib.pyplot as py
 
 
+
+graph = defaultdict(list)
 # Represents an undirected graph.  Key is node ID, value is a list of           
 # node IDs that share an edge.
 # {nodeID: [nodeIDs...]}
-graph = defaultdict(list)
 
 
+color = {}
 # Maps node ID to some color value
 # {nodeID: 'color'}
-color = {}
 
 
+coords = {}
 # Maps node ID to a tuple representing Cartesian coordinates
 # {nodeID: (x, y)}
-coords = {}
 
 
+distance = defaultdict(list)
 # Maps node ID to a list of tuples which represent NodeID and distance 
 # {nodeID: [(nodeID, distance)...]}  
-distance = defaultdict(list)
 
 
-# List of existing line segments (edges)
 lines = []
+# List of existing line segments (edges on graph)
+# [(A, B, C, x1, y1, x2, y2) ...]
 
 
 def generate_points(n):
@@ -44,8 +46,8 @@ def generate_points(n):
     unit square and stores them as tuples mapped to integer IDs
     '''
     for i in range(n):
-        randX = random.randint(1, 10)
-        randY = random.randint(1, 10)
+        randX = random.randint(1, 100)
+        randY = random.randint(1, 100)
         v = (randX, randY)
         coords[i] = v 
         
@@ -85,12 +87,12 @@ def draw_graph():
         lineAdded = False
         while not lineAdded:
             # If there's no nodes left to check for selected node, remove from 
-            # available nodes and select a new node
+            # available nodes and exit loop to select a new node
             if not distance[selected_point] :
                 available_nodes.remove(selected_point)
                 break
             # Get closest point to our chosen point and remove it from dictionary
-            # to indicate we have tried to add an edge to it
+            # to indicate we have tried to add an edge to it.  
             else : 
                 nearest_point = distance[selected_point][0][0]
                 distance[selected_point].pop(0)
@@ -106,82 +108,76 @@ def draw_graph():
                     y2 = pt2[1]
                     
                     # Check if vertical line, might need to handle differently?
-                    if x1 == x2:
-                        print("Vertical line!")
-                        pass
+                    #if x1 == x2:
+                    #    print("Vertical line!")
+                    #    pass
                     # Check if this line will intersect any other edges in graph
+                    #else:
+                    # Calculate values for line Ax + By = C
+                    A1 = y2 - y1
+                    B1 = x1 - x2
+                    C1 = A1 * x1 + B1 * y1
+                    # If no edges on graph then no conflict, so add this as first edge
+                    if not lines:
+                        graph[selected_point].append(nearest_point)
+                        lines.append((A1, B1, C1, x1, y1, x2, y2))
+                        lineAdded = True
+                    # Check all other edges for potential intersection
                     else:
-                        # Calculate values for line Ax + By = C
-                        A1 = y2 - y1
-                        B1 = x1 - x2
-                        C1 = A1 * x1 + B1 * y1
-                        # No edges on graph so no conflict, add this as first edge
-                        if not lines:
+                        intersection_found = False
+                        
+                        for line in lines:
+                            # Retrieve pre-calculated line information
+                            A2 = line[0]
+                            B2 = line[1]
+                            C2 = line[2]
+                            x3 = line[3]
+                            y3 = line[4]
+                            x4 = line[5]
+                            y4 = line[6]
+                            
+                            # Calculate determinant of system
+                            det = (A1 * B2) - (A2 * B1)
+                            if det == 0:
+                                #lines are parallel, handle differently?
+                                print("Parallel!")
+                                pass
+                            # Calculate point of intersection
+                            else:
+                                x = (B2 * C1 - B1 * C2) / det
+                                y = (A1 * C2 - A2 * C1) / det
+                                
+                                # Check if on segment 1
+                                if x > min(x1, x2) and x < max(x1, x2):
+                                    if y > min(y1, y2) and y < max(y1, y2):
+                                        # Check if on segment 2
+                                        if x > min(x3, x4) and x < max(x3, x4):
+                                            if y > min(y3, y4) and y < max(y3, y4):
+                                                # this will intersect so move on
+                                                print("Intersection!")
+                                                intersection_found = True
+                                                break
+                                            
+                        # No intersection so add edge and line
+                        if not intersection_found:
                             graph[selected_point].append(nearest_point)
                             lines.append((A1, B1, C1, x1, y1, x2, y2))
-                        # Check all other edges for potential intersection
-                        else:
-                            intersection_found = False
-                            
-                            for line in lines:
-                                # Retrieve pre-calculated line information
-                                A2 = line[0]
-                                B2 = line[1]
-                                C2 = line[2]
-                                x3 = line[3]
-                                y3 = line[4]
-                                x4 = line[5]
-                                y4 = line[6]
-                                
-                                # Calculate determinant of system
-                                det = (A1 * B2) - (A2 * B1)
-                                if det == 0:
-                                    #lines are parallel, handle differently?
-                                    print("Parallel!")
-                                    pass
-                                # Calculate point of intersection
-                                else:
-                                    x = (B2 * C1 - B1 * C2) / det
-                                    y = (A1 * C2 - A2 * C1) / det
-                                    
-                                    # Check if on segment 1
-                                    if x >= min(x1, x2) and x <= max(x1, x2):
-                                        if y >= min(y1, y2) and y <= max(y1, y2):
-                                            # Check if on segment 2
-                                            if x >= min(x3, x4) and x <= max(x3, x4):
-                                                if y >= min(y3, y4) and y <= max(y3, y4):
-                                                    # this will intersect so move on
-                                                    print("Intersection!")
-                                                    intersection_found = True
-                                                    break
-                                                
-                            # No intersection so add edge and line
-                            if not intersection_found:
-                                graph[selected_point].append(nearest_point)
-                                lines.append((A1, B1, C1, x1, y1, x2, y2))
-                                lineAdded = True
-                    
-            
-            
-    
-    
-    
-    
-    
-    #print(selected_point)
-    #print(nearest_point)
+                            lineAdded = True
+
         
 def main():
-    generate_points(10)
-    calculate_distances()
-    draw_graph()
-    
-    print(lines)
-    
+    generate_points(3)
     for key, value in coords.items():
         print(key, value)
         
+    calculate_distances()
     #print(distance)
+    
+    draw_graph()
+    print(lines)
+    
+    for key, value in graph.items():
+        print("Node " + str(key) + " connected to nodes: " + str(value))
     
     #py.plot([4,5,6])
     #py.show()
