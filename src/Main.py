@@ -48,7 +48,7 @@ def generate_points(n):
     for i in range(n):
         randX = random.randint(1, 100)
         randY = random.randint(1, 100)
-        v = (randX, randY)
+        v = (float(randX), float(randY))
         coords[i] = v 
         
 
@@ -139,21 +139,23 @@ def draw_graph():
                                 # Calculate determinant of system
                                 det = (A1 * B2) - (A2 * B1)
                                 if det == 0:
-                                    #lines are parallel
-                                    if x1 == x3 or x1 == x4 and x2 == x3 or x2 == x4:
-                                        #lines are the same...this shouldn't happen now
-                                        print("Same Line!")
-                                        intersection_found = True
-                                    elif (x1 > min(x3, x4) and x1 < max(x3, x4)
-                                            or x2 > min(x3, x4) and x2 < max(x3, x4)
-                                            or x3 > min(x1, x2) and x3 < max(x1, x2)
-                                            or x4 > min(x1, x2) and x4 < max(x1, x2)):
-                                        # Parallel lines overlap and thus intersect
-                                        print("Parallel Overlap!")
-                                        intersection_found = True
-                                    else:
-                                        # Parallel lines don't overlap so we are ok
-                                        pass
+                                    # edges are parallel
+                                    if abs(A1) == abs(A2) and abs(B1) == abs(B2) and abs(C1) == abs(C2):
+                                        # edges fall on same line, so check for overlap
+                                        if x1 == x3 or x1 == x4 and x2 == x3 or x2 == x4:
+                                            # edges are exactly the same
+                                            print("Same Line!")
+                                            intersection_found = True
+                                        elif (x1 > min(x3, x4) and x1 < max(x3, x4)
+                                                or x2 > min(x3, x4) and x2 < max(x3, x4)
+                                                or x3 > min(x1, x2) and x3 < max(x1, x2)
+                                                or x4 > min(x1, x2) and x4 < max(x1, x2)):
+                                            # Parallel edges overlap and thus intersect
+                                            print("Parallel Overlap!")
+                                            intersection_found = True
+                                        else:
+                                            # Parallel lines don't overlap so we are ok
+                                            pass
                                 # Calculate point of intersection
                                 else:
                                     x = (B2 * C1 - B1 * C2) / det
@@ -178,12 +180,17 @@ def draw_graph():
     
         
 def main():
+    # Parallel Lines test
+    #coords[0] = (1.0, 1.0)
+    #coords[1] = (3.0, 3.0)
+    #coords[2] = (2.0, 1.0)
+    #coords[3] = (4.0, 3.0)
     # Vertical Lines test
-    coords[0] = (5, 0)
-    coords[1] = (5, 10)
-    coords[2] = (5, 15)
+    #coords[0] = (5.0, 5.0)
+    #coords[1] = (5.0, 10.0)
+    #coords[2] = (5.0, 15.0)
     
-    #generate_points(10)
+    generate_points(10)
     for key, value in coords.items():
         print(key, value)
         
