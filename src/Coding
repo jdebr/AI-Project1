@@ -2,9 +2,6 @@ import math
 import random
 from collections import defaultdict
 import matplotlib.pyplot as plt
-import numpy as np
-from Master import graph
-from pygments.lexers.csound import newline
 
 
 '''
@@ -51,6 +48,7 @@ def random_points(n):
 
 
 def distance_calculation():
+    '''
     for key1, value in graph.items():
             print("Start of Loop")
             x1Coordinate = value[0]
@@ -72,7 +70,21 @@ def distance_calculation():
     for key3, finalvalue in calculated_graph.items():
         finalvalue.sort(key = lambda calculated_distance : calculated_distance[1])
     print(calculated_graph)
-            #calculated_graph[calculated_distance].append((x1Coordinate, y1Coordinate,x2Coordinate,y2Coordinate))    
+            #calculated_graph[calculated_distance].append((x1Coordinate, y1Coordinate,x2Coordinate,y2Coordinate)) 
+    '''
+    for i in range(len(graph)):
+        for j in range(i + 1, len(graph)):
+            # Calculate distance from i to j, 
+            # store in both distances[i] and distances[j]
+            delta_x = graph[i][0] - graph[j][0]
+            delta_y = graph[i][1] - graph[j][1]
+            d = math.sqrt(pow(delta_x, 2) + pow(delta_y, 2))
+            calculated_graph[i].append((j, d))
+            calculated_graph[j].append((i, d)) 
+            
+    # Sort each list of tuples by distance
+    for k, v in calculated_graph.items():
+        v.sort(key=lambda d: d[1])   
          
 def visual_draw():
     listX = []
@@ -93,8 +105,11 @@ def visual_draw():
                 '''
                 listX.append(graph[tempValue][0])
                 listY.append(graph[tempValue][1])
+                listX.append(graph[key][0])
+                listY.append(graph[key][1])
                 #plt.plot((graph[key][0],graph[tempValue][0]),(graph[tempValue][1],graph[key][1]),'b-')
                 #print(graph[tempValue])
+        
         plt.plot(listX,listY,'b-')
         print("????????????????")
         print(listX)
@@ -112,7 +127,7 @@ def visual_draw():
         #plt.plot([x,y],'b-')
     
     #plt.plot([1,1,2,4], 'b-')    
-    plt.axis([0, 1, 0,1 ])
+    plt.axis([0,2,0,2])
     plt.show()
 
     
@@ -121,6 +136,7 @@ def edge_creation():
     
     available_nodes = list(graph.keys())
     while available_nodes:
+        print("Available Nodes " + str(available_nodes))
         # Choose random point from available nodes
         selected_point = random.choice(available_nodes)
         # Boolean to loop until a line is added
@@ -146,10 +162,12 @@ def edge_creation():
                     y1 = pt1[1]
                     x2 = pt2[0]
                     y2 = pt2[1]
-                    
+                    intersection_found = False
                     # Check if vertical line, might need to handle differently?
                     if x1 == x2:
                         print("Vertical line!")
+                        intersection_found = True
+                        break
                         pass
                     # Check if this line will intersect any other edges in graph
                     else:
@@ -164,7 +182,7 @@ def edge_creation():
                             lineAdded = True
                         # Check all other edges for potential intersection
                         else:
-                            intersection_found = False
+                            
                             
                             for line in lines:
                                 # Retrieve pre-calculated line information
@@ -200,7 +218,7 @@ def edge_creation():
                                 else:
                                     x = (B2 * C1 - B1 * C2) / det
                                     y = (A1 * C2 - A2 * C1) / det
-                                    
+                                    print("Value of x and y " + str(x) + " "+ str(y))
                                     # Check if on segment 1
                                     if x > min(x1, x2) and x < max(x1, x2):
                                         if y > min(y1, y2) and y < max(y1, y2):
@@ -232,6 +250,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-'''
-After running the file with drawing edges there seem to be intersection still happening and not all points are getting connceted
-'''
+    '''
+    out of 10 times running this program 2-3 times there are 1 or 2 vertices that can be
+    joined with vertices near by but it is not connected
+    '''
