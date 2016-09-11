@@ -75,16 +75,36 @@ def distance_calculation():
             #calculated_graph[calculated_distance].append((x1Coordinate, y1Coordinate,x2Coordinate,y2Coordinate))    
          
 def visual_draw():
+    listX = []
+    listY = []
     for key, value in edgegraph.items():
         print("*****************")
         print(graph[key])
+        listX.append(graph[key][0])
+        listY.append(graph[key][1])
         for i in range(len(value)):
             tempValue = value[i]
             if tempValue == None:
                 break
             else:
-                plt.plot([graph[key][0],graph[tempValue][0]],[graph[tempValue][1],graph[key][1]],'b-')
-                print(graph[tempValue])
+                '''print("=============================")
+                print([graph[key][0],graph[tempValue][0]],[graph[tempValue][1],graph[key][1]])
+                print("=============================")
+                '''
+                listX.append(graph[tempValue][0])
+                listY.append(graph[tempValue][1])
+                #plt.plot((graph[key][0],graph[tempValue][0]),(graph[tempValue][1],graph[key][1]),'b-')
+                #print(graph[tempValue])
+        plt.plot(listX,listY,'b-')
+        print("????????????????")
+        print(listX)
+        print(listY)
+        print("????????????????")         
+        del listX[:]
+        del listY[:]
+        
+
+
     for key, value in graph.items():
         x = value[0]
         y = value[1]
@@ -212,3 +232,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+'''
+After running the file with drawing edges there seem to be intersection still happening and not all points are getting connceted
+'''
