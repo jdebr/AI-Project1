@@ -46,8 +46,8 @@ def generate_points(n):
     unit square and stores them as tuples mapped to integer IDs
     '''
     for i in range(n):
-        randX = random.randint(1, 100)
-        randY = random.randint(1, 100)
+        randX = random.randint(1, 10000)
+        randY = random.randint(1, 10000)
         v = (float(randX), float(randY))
         coords[i] = v 
         
@@ -168,7 +168,6 @@ def draw_graph():
                                             if x > min(x3, x4) and x < max(x3, x4):
                                                 if y > min(y3, y4) and y < max(y3, y4):
                                                     # this will intersect so move on
-                                                    print("Intersection!")
                                                     intersection_found = True
                                                     break
                                                 
@@ -209,7 +208,7 @@ def main():
     #coords[1] = (5.0, 10.0)
     #coords[2] = (5.0, 15.0)
     
-    generate_points(10)
+    generate_points(100)
     for key, value in coords.items():
         print(key, value)
         
