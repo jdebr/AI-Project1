@@ -107,7 +107,7 @@ def draw_graph():
                     x2 = pt2[0]
                     y2 = pt2[1]
                     
-                    # Check if vertical line, might need to handle differently?
+                    #Check if vertical line, might need to handle differently?
                     if x1 == x2:
                         print("Vertical line!")
                         pass
@@ -177,6 +177,25 @@ def draw_graph():
                                 graph[selected_point].append(nearest_point)
                                 lines.append((A1, B1, C1, x1, y1, x2, y2))
                                 lineAdded = True
+                                    
+                                
+def plot_graph():
+    xval = []
+    yval = []
+    for i in range(len(coords)):
+        xval.append(coords[i][0])
+        yval.append(coords[i][1])
+    py.plot(xval, yval, 'or')
+    
+    
+    
+    for pt, edges in graph.items():
+        for pt2 in edges:
+            xval = [coords[pt][0], coords[pt2][0]]
+            yval = [coords[pt][1], coords[pt2][1]]
+            py.plot(xval, yval)
+    
+    py.show()
     
         
 def main():
@@ -202,10 +221,9 @@ def main():
     
     for key, value in graph.items():
         print("Node " + str(key) + " connected to nodes: " + str(value))
-    
-    #py.plot([4,5,6])
-    #py.show()
-    
+        
+    plot_graph()
+
     
 if __name__ == '__main__':
     main()
