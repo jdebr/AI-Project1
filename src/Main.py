@@ -36,11 +36,6 @@ distance = defaultdict(list)
 # {nodeID: [(nodeID, distance)...]}  
 
 
-lines = []
-# List of existing line segments (edges on graph)
-# [(A, B, C, x1, y1, x2, y2) ...]
-
-
 def generate_points(n):
     ''' Generates n sets of points randomly scattered on the 
     unit square and stores them as tuples mapped to integer IDs
@@ -72,14 +67,19 @@ def calculate_distances():
         v.sort(key=lambda d: d[1])
         
         
-def draw_graph():
+def build_graph():
     ''' Add edges to graph by selecting a random point and adding 
     an edge to the nearest point that doesn't already have an edge
     and such that it will not cross any other edge'''
-    # List of node IDs to check for possible edges
+    lines = []
+    # List of existing line segments (edges on graph)
+    # [(A, B, C, x1, y1, x2, y2) ...]
+    
     available_nodes = list(coords.keys())
-
-    # Run until no connections available
+    # List of node IDs to check for possible edges
+    
+    
+    # Start main loop - run until no connections available
     while available_nodes:
         # Choose random point from available nodes
         selected_point = random.choice(available_nodes)
@@ -196,33 +196,40 @@ def plot_graph():
     
     py.show()
     
-        
-def main():
-    # Parallel Lines test
-    #coords[0] = (1.0, 1.0)
-    #coords[1] = (3.0, 3.0)
-    #coords[2] = (2.0, 1.0)
-    #coords[3] = (4.0, 3.0)
-    # Vertical Lines test
-    #coords[0] = (5.0, 5.0)
-    #coords[1] = (5.0, 10.0)
-    #coords[2] = (5.0, 15.0)
     
-    generate_points(100)
-    for key, value in coords.items():
-        print(key, value)
+def unit_tests():
+    for i in range(1000):
+        generate_points(3)
+        calculate_distances()
+        build_graph()
+        x = 0
+        for node, edges in graph.items():
+            x += len(edges)
+        
+        if x != 3:
+            print("Num Edges: " + str(x))
+            print("Error")
+            
+            
+def run_experiment():
+    generate_points(20)
+    #for key, value in coords.items():
+    #    print(key, value)
         
     calculate_distances()
     #print(distance)
     
-    draw_graph()
-    #print(lines)
-    
-    for key, value in graph.items():
-        print("Node " + str(key) + " connected to nodes: " + str(value))
+    build_graph()
+    #for key, value in graph.items():
+    #print("Node " + str(key) + " connected to nodes: " + str(value))
         
     plot_graph()
-
+    
+        
+def main():
+    run_experiment()
+    #unit_tests()
+    
     
 if __name__ == '__main__':
     main()
