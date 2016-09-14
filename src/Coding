@@ -2,6 +2,7 @@ import math
 import random
 from collections import defaultdict
 import matplotlib.pyplot as plt
+from networkx.classes.function import nodes
 
 
 '''
@@ -9,6 +10,7 @@ import matplotlib.pyplot as plt
 graphX = []
 graphY = []
 '''
+NoColor = 4
 #list of lines
 lines = []
 
@@ -18,15 +20,24 @@ edgegraph = defaultdict(list)
 # A dictionary having all the random points generated
 graph = {}
 
+#List of colors
+colorList = []
+
+#Dictionary to store vertices and associated color 
+color = {}
+
+#Adjacency Matrix
+adjacent_matrix = defaultdict(list)
+
 # A dictionary graph having Euclidean distance as key and coordinates as its elements
 calculated_graph = defaultdict(list)
 
 
 def random_points(n):
     for i in range(n):
-        x = random.random()
-        y = random.random()
-        v = (x,y)
+        x = random.randint(1, 10)
+        y = random.randint(1, 10)
+        v = (float(x), float(y))
         graph[i] = v
     print(graph)
     '''
@@ -85,16 +96,21 @@ def distance_calculation():
     # Sort each list of tuples by distance
     for k, v in calculated_graph.items():
         v.sort(key=lambda d: d[1])   
+        
+    print(";;;;;;;;;;;;;;;;;;;;;")
+    print(calculated_graph.items())
          
 def visual_draw():
     listX = []
     listY = []
     for key, value in edgegraph.items():
         print("*****************")
+        print(str(key) + " value in our dictionary of edges is!!")
         print(graph[key])
         listX.append(graph[key][0])
         listY.append(graph[key][1])
         for i in range(len(value)):
+            valueRange = len(value)
             tempValue = value[i]
             if tempValue == None:
                 break
@@ -105,13 +121,15 @@ def visual_draw():
                 '''
                 listX.append(graph[tempValue][0])
                 listY.append(graph[tempValue][1])
+                plt.plot(listX,listY,'b-')
                 listX.append(graph[key][0])
                 listY.append(graph[key][1])
                 #plt.plot((graph[key][0],graph[tempValue][0]),(graph[tempValue][1],graph[key][1]),'b-')
                 #print(graph[tempValue])
         
-        plt.plot(listX,listY,'b-')
+        #plt.plot(listX,listY,'b-')
         print("????????????????")
+        print("The list of X and Y coordinates ")
         print(listX)
         print(listY)
         print("????????????????")         
@@ -127,7 +145,7 @@ def visual_draw():
         #plt.plot([x,y],'b-')
     
     #plt.plot([1,1,2,4], 'b-')    
-    plt.axis([0,2,0,2])
+    plt.axis([0,10,0,10])
     plt.show()
 
     
@@ -136,9 +154,12 @@ def edge_creation():
     
     available_nodes = list(graph.keys())
     while available_nodes:
+        print("Dictionary with the distance calculated is " + str(calculated_graph.items()))
+        print("!!!!!!!!!!!!!!!!!!!!!")
         print("Available Nodes " + str(available_nodes))
         # Choose random point from available nodes
         selected_point = random.choice(available_nodes)
+        print("Selected Point is " + str(selected_point))
         # Boolean to loop until a line is added
         lineAdded = False
         while not lineAdded:
@@ -152,7 +173,7 @@ def edge_creation():
             else : 
                 nearest_point = calculated_graph[selected_point][0][0]
                 calculated_graph[selected_point].pop(0)
-                
+                print("Nearest Point is " + str(nearest_point))
                 # if no edge already exists between these points, calculate line equation
                 if nearest_point not in edgegraph[selected_point] and selected_point not in edgegraph[nearest_point]:
                     # set coordinates for calculation
@@ -180,6 +201,7 @@ def edge_creation():
                             edgegraph[selected_point].append(nearest_point)
                             lines.append((A1, B1, C1, x1, y1, x2, y2))
                             lineAdded = True
+                            print(" Line is added ")
                         # Check all other edges for potential intersection
                         else:
                             
@@ -195,7 +217,7 @@ def edge_creation():
                                 y4 = line[6]
                                 
                                 # Calculate determinant of system
-                                det = (A1 * B2) - (A2 * B1)
+                                det = A1 * B2 - A2 * B1
                                 if det == 0:
                                     # edges are parallel
                                     if abs(A1) == abs(A2) and abs(B1) == abs(B2) and abs(C1) == abs(C2):
@@ -218,7 +240,9 @@ def edge_creation():
                                 else:
                                     x = (B2 * C1 - B1 * C2) / det
                                     y = (A1 * C2 - A2 * C1) / det
-                                    print("Value of x and y " + str(x) + " "+ str(y))
+                                    x = round(x,3)
+                                    y = round(y,3)
+                                    #print("Value of x and y " + str(x) + " "+ str(y))
                                     # Check if on segment 1
                                     if x > min(x1, x2) and x < max(x1, x2):
                                         if y > min(y1, y2) and y < max(y1, y2):
@@ -226,6 +250,26 @@ def edge_creation():
                                             if x > min(x3, x4) and x < max(x3, x4):
                                                 if y > min(y3, y4) and y < max(y3, y4):
                                                     # this will intersect so move on
+                                                    print("X1 is " + str(x1))
+                                                    print("X2 is " + str(x2))
+                                                    print("Y1 is " + str(y1))
+                                                    print("Y2 is " + str(y2))
+                                                    print("X3 is " + str(x3))
+                                                    print("X4 is " + str(x4))
+                                                    print("Y3 is " + str(y3))
+                                                    print("Y4 is " + str(y4))
+                                                    
+                                                    print("Minimum of x1 and x2 is " + str(min(x1,x2)))
+                                                    print("Minimum of y1 and y2 is " + str(min(y1,y2)))
+                                                    print("Minimum of x3 and x4 is " + str(min(x3,x4)))
+                                                    print("Minimum of y3 and y4 is " + str(min(y3,y4)))
+                                                    print("Maximum of x1 and x2 is " + str(max(x1,x2)))
+                                                    print("Maximum of y1 and y2 is " + str(max(y1,y2)))
+                                                    print("Maximum of x3 and x4 is " + str(max(x3,x4)))
+                                                    print("Maximum of y3 and y4 is " + str(max(y3,y4)))
+                                                    print("X is " + str(x))
+                                                    print("Y is " + str(y))
+                                                    
                                                     print("Intersection!")
                                                     intersection_found = True
                                                     break
@@ -234,23 +278,90 @@ def edge_creation():
                             if not intersection_found:
                                 edgegraph[selected_point].append(nearest_point)
                                 lines.append((A1, B1, C1, x1, y1, x2, y2))
-                                lineAdded = True                   
+                                lineAdded = True 
+                                print(" Line is added ")                  
     print("+++++++++++++++++++++")
     print(edgegraph.items())
     print("+++++++++++++++++++++")
     print(lines)
 
+def bactracking_algorithm():
+    n = 5
+    num = 4#input ("Please enter 3 or 4 for number of colors you want ")
+    available_nodes_coloring = list(edgegraph.keys())
+    print("Color Available node " + str(available_nodes_coloring))
+    
+    '''
+    this can go in another function or maybe used by other algorithms.
+    This is the block where adjacency matric is made
+    '''
+    while available_nodes_coloring:
+        random_point = random.choice(available_nodes_coloring)
+        print(random_point)
+        for i in range(n):
+            if i == random_point:
+                adjacent_matrix[random_point].append(1)
+            elif i not in edgegraph[random_point] and random_point not in edgegraph[i]:
+                adjacent_matrix[random_point].append(0)
+            else:
+                adjacent_matrix[random_point].append(1)
+        available_nodes_coloring.remove(random_point)   
+    print(adjacent_matrix.items())
+    
+    #Work on this Big Mess
+    giveColors(0)
+    
+    
+    #Actual coloring starts here
+    
+def giveColors(currentNode):   
+    noVertices = 5
+    #oVertices = Totalnodes
+    print(currentNode)    
+    for j in range(NoColor):
+    
+          
+        if CheckandAssignColoring(currentNode,noVertices,j):
+            colorList.append(j)
+            print("Color List")
+            print(colorList)
+            if currentNode + 1 < noVertices:
+                giveColors(currentNode + 1)
+            else:
+                print("Final color list")
+                print(colorList)
+                break
+                    
+                    
+
+   
+def CheckandAssignColoring(nodeNumber,totalVertices, colorNumber):
+    for i in range(totalVertices):
+        print("///////////////////////")
+        print(adjacent_matrix[nodeNumber][i])
+        print("///////////////////////")
+        if adjacent_matrix[nodeNumber][i] == 1:
+            if i in colorList:
+                if colorNumber == colorList[i]:
+                    return False
+            '''
+            if not colorList:
+                return True
+            else:
+                for key, value in colorList.iteritems():
+                    if colorNumber == value[i]:
+                        return False
+                    '''
+    return True
 def main():
 
-    random_points(10)
+    random_points(5)
     distance_calculation()
     edge_creation()
+    
+    bactracking_algorithm()
     visual_draw()
     
 
 if __name__ == '__main__':
     main()
-    '''
-    out of 10 times running this program 2-3 times there are 1 or 2 vertices that can be
-    joined with vertices near by but it is not connected
-    '''
