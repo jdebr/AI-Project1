@@ -12,6 +12,8 @@ import random
 import math
 from collections import defaultdict
 import matplotlib.pyplot as py
+from networkx.classes.function import is_empty
+from Assignment import colorList
 
 
 
@@ -24,6 +26,9 @@ graph = defaultdict(list)
 color = {}
 # Maps node ID to some color value
 # {nodeID: 'color'}
+
+colorList = []
+#Maps vertex number to key value
 
 
 #Adjacency Matrix
@@ -184,7 +189,6 @@ def build_graph():
 
 def matrix_creation():
     numberofvertices = 5
-    numberofcolor = 4
     available_nodes_coloring = list(graph.keys())
     print("Color Available node " + str(available_nodes_coloring))
     
@@ -207,11 +211,58 @@ def matrix_creation():
                 adjacent_matrix[random_point].append(1)
         available_nodes_coloring.remove(random_point)   
     print(adjacent_matrix.items())
+    BackTracking()
     
 
-
+def BackTracking():
+    numberOfColors = 4
+    colorValue = 0
+    numberOfVertices = len(adjacent_matrix)
+    nodeNumber = 0
+    while colorValue < numberOfColors:
+        if nodeNumber < numberOfVertices:  
+            if checkAndAssignColor(nodeNumber,numberOfVertices,colorValue):
+                colorList.append(colorValue)
+                print("Initial Color List")
+                print(colorList)
+                colorValue = 0
+                nodeNumber = nodeNumber + 1
+            else:
+                print("Increasing Color Value")
+                colorValue = colorValue + 1
+        else:
+            break
+        
+    
+    print(colorList)
+            
+                
+   
+def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
+    for i in range(totalVertices):
+        
+        '''Testing
+        print("///////////////////////")
+        print(adjacent_matrix[nodeNumber][i])
+        print("///////////////////////")
+        '''
+        if adjacent_matrix[nodeNumber][i] == 1:
+            if not colorList:
+                return True
+            else:
+                lengthOfColorArray = len(colorList)
+                print(lengthOfColorArray)
+                if i >= lengthOfColorArray:
+                    pass
+                else:
+                    if colorNumber == colorList[i]:
+                        return False
+                    
+                
+    return True
                               
 def plot_graph():
+    print(coords)
     xval = []
     yval = []
     for i in range(len(coords)):
@@ -256,12 +307,11 @@ def run_experiment():
     build_graph()
     #for key, value in graph.items():
     #print("Node " + str(key) + " connected to nodes: " + str(value))
-    
-
     matrix_creation()
+    plot_graph()
     
             
-    plot_graph()
+
     
         
 def main():
