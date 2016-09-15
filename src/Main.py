@@ -26,6 +26,9 @@ color = {}
 # {nodeID: 'color'}
 
 
+#Adjacency Matrix
+adjacent_matrix = defaultdict(list)
+
 coords = {}
 # Maps node ID to a tuple representing Cartesian coordinates
 # {nodeID: (x, y)}
@@ -177,7 +180,37 @@ def build_graph():
                                 lines.append((A1, B1, C1, x1, y1, x2, y2))
                                 lineAdded = True
                                     
-                                
+
+
+def matrix_creation():
+    numberofvertices = 5
+    numberofcolor = 4
+    available_nodes_coloring = list(graph.keys())
+    print("Color Available node " + str(available_nodes_coloring))
+    
+    '''
+    this can go in another function or maybe used by other algorithms.
+    This is the block where adjacency matrix is made
+    '''
+    while available_nodes_coloring:
+        random_point = random.choice(available_nodes_coloring)
+        '''
+        for testing
+        print(random_point)
+        '''
+        for i in range(numberofvertices):
+            if i == random_point:
+                adjacent_matrix[random_point].append(1)
+            elif i not in graph[random_point] and random_point not in graph[i]:
+                adjacent_matrix[random_point].append(0)
+            else:
+                adjacent_matrix[random_point].append(1)
+        available_nodes_coloring.remove(random_point)   
+    print(adjacent_matrix.items())
+    
+
+
+                              
 def plot_graph():
     xval = []
     yval = []
@@ -212,17 +245,22 @@ def unit_tests():
             
             
 def run_experiment():
-    generate_points(20)
+    generate_points(5)
     #for key, value in coords.items():
     #    print(key, value)
         
     calculate_distances()
     #print(distance)
     
+    
     build_graph()
     #for key, value in graph.items():
     #print("Node " + str(key) + " connected to nodes: " + str(value))
-        
+    
+
+    matrix_creation()
+    
+            
     plot_graph()
     
         
