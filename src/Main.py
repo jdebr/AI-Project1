@@ -215,7 +215,7 @@ def matrix_creation():
     
 
 def BackTracking():
-    numberOfColors = 4
+    numberOfColors = 3
     colorValue = 0
     numberOfVertices = len(adjacent_matrix)
     nodeNumber = 0
@@ -230,6 +230,19 @@ def BackTracking():
             else:
                 print("Increasing Color Value")
                 colorValue = colorValue + 1
+                #if all goes wrong then probably end everything and print no solution to current graph.
+                if colorValue == numberOfColors and nodeNumber == 0:
+                    print("No more possible solutions!!!!")
+                    break
+                #possible solution to back tracking
+                elif colorValue == numberOfColors:
+                    # Reset color value for current node
+                    nodeNumber = nodeNumber - 1
+                    colorValue = 0
+                    del colorList[nodeNumber]
+                    #nodeNumber = nodeNumber - 1
+                    #del colorList[nodeNumber]
+                    #colorValue = 0
         else:
             break
         
