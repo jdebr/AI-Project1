@@ -26,6 +26,10 @@ colorNode = defaultdict(list)
 # Maps node ID to some color value
 # {nodeID: 'color'}
 
+colorNodeChecker = defaultdict(list)
+# Maps node ID to some color value
+# {nodeID: 'color'}
+
 colorList = []
 listOfColor = []
 #Maps vertex number to key value
@@ -238,17 +242,40 @@ def BackTracking():
 
             else:
                 tempColorList.remove(randomColor)
-                print("Temp Color List 4 " + str(tempColorList))
-                if colors + 1 == len(listOfColor):
+                print("Temp Color List 4 " + str(tempColorList))                
+                if colors + 1 == len(listOfColor) or not tempColorList:
                     print("Back Track")
-                    nodeNumber = nodeNumber - 1
-                    colorToDelete = colorNode.get(nodeNumber)
-                    print(colorToDelete)
-                    tempColorList = copy.deepcopy(listOfColor)
-                    tempColorList.remove(colorToDelete)
+                    nodeNumber = nodeNumber - 1                   
+                    colorToDelete = colorNode.__getitem__(nodeNumber)
+                    print("Current Node Working " + str(nodeNumber))
+                    
+                    colorToDelete = str(colorToDelete).replace('[', '').replace(']', '')
+                    
+                    colorInt = int(colorToDelete)
+                    print(colorInt)
+                    
                     colorNode.pop(nodeNumber)
+                    if colorInt not in colorNodeChecker[nodeNumber]:
+                        colorNodeChecker[nodeNumber].append(colorInt)
+                        print("Color Node checker " + str(colorNodeChecker.items()))
+                        for key, values in colorNodeChecker.items():
+                            tempColorList = copy.deepcopy(listOfColor)
+                            for values in colorNodeChecker[nodeNumber]:
+                                print("Temp Color List 5 " + str(tempColorList))
+                                print(values)
+                                tempColorList.remove(values)
+                    else:
+                        print("Color Node checker " + str(colorNodeChecker.items()))
+                        for key, values in colorNodeChecker.items():
+                            tempColorList = copy.deepcopy(listOfColor)
+                            for values in colorNodeChecker[nodeNumber]:
+                                print("Temp Color List 6 " + str(tempColorList))
+                                print(values)
+                                tempColorList.remove(values)
+                                            
                     print("<><><><><><><>" + str(tempColorList))
                     print("Node" + str(nodeNumber))
+                    break
                     
             
     print (colorNode.items())                
@@ -324,8 +351,9 @@ def run_experiment():
     build_graph()
     #for key, value in graph.items():
     #print("Node " + str(key) + " connected to nodes: " + str(value))
-    matrix_creation()
     plot_graph()
+    matrix_creation()
+    
     
             
 
