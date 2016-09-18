@@ -12,8 +12,7 @@ import random
 import math
 from collections import defaultdict
 import matplotlib.pyplot as py
-from networkx.classes.function import is_empty
-from Assignment import colorList
+import copy
 
 
 
@@ -23,11 +22,12 @@ graph = defaultdict(list)
 # {nodeID: [nodeIDs...]}
 
 
-color = {}
+colorNode = defaultdict(list)
 # Maps node ID to some color value
 # {nodeID: 'color'}
 
 colorList = []
+listOfColor = []
 #Maps vertex number to key value
 
 
@@ -188,9 +188,8 @@ def build_graph():
 
 
 def matrix_creation():
-    numberofvertices = 5
     available_nodes_coloring = list(graph.keys())
-    print("Color Available node " + str(available_nodes_coloring))
+    print("Node's to Color " + str(available_nodes_coloring))
     
     '''
     this can go in another function or maybe used by other algorithms.
@@ -202,7 +201,7 @@ def matrix_creation():
         for testing
         print(random_point)
         '''
-        for i in range(numberofvertices):
+        for i in range(len(graph)):
             if i == random_point:
                 adjacent_matrix[random_point].append(1)
             elif i not in graph[random_point] and random_point not in graph[i]:
@@ -215,50 +214,55 @@ def matrix_creation():
     
 
 def BackTracking():
-    numberOfColors = 3
-    colorValue = 0
+    #This needs to be asked during graph point generation
+    numberOfColors = 4
+    for i in range(numberOfColors):
+        listOfColor.append(i)
     numberOfVertices = len(adjacent_matrix)
+    tempColorList = copy.deepcopy(listOfColor)
     nodeNumber = 0
-    while colorValue < numberOfColors:
-        if nodeNumber < numberOfVertices:  
-            if checkAndAssignColor(nodeNumber,numberOfVertices,colorValue):
-                colorList.append(colorValue)
-                print("Initial Color List")
-                print(colorList)
-                colorValue = 0
+    print("Temp Color List " + str(tempColorList))
+    while nodeNumber < len(adjacent_matrix):
+        print("Node selected " + str(nodeNumber))
+        for colors in range(len(listOfColor)):
+            randomColor = tempColorList[random.randrange(len(tempColorList))]
+            print("Color selected is " + str(randomColor))
+            if checkAndAssignColor(nodeNumber, numberOfVertices, randomColor):
+                colorNode[nodeNumber].append(randomColor)
+                print("Temp Color List 2 " + str(tempColorList))
+                print("Test this " + str(colorNode.items()))
+                tempColorList = copy.deepcopy(listOfColor)
+                print("Temp Color List 3 " + str(tempColorList))
                 nodeNumber = nodeNumber + 1
+                break
+
             else:
-                print("Increasing Color Value")
-                colorValue = colorValue + 1
-                #if all goes wrong then probably end everything and print no solution to current graph.
-                if colorValue == numberOfColors and nodeNumber == 0:
-                    print("No more possible solutions!!!!")
-                    break
-                #possible solution to back tracking
-                elif colorValue == numberOfColors:
-                    # Reset color value for current node
+                tempColorList.remove(randomColor)
+                print("Temp Color List 4 " + str(tempColorList))
+                if colors + 1 == len(listOfColor):
+                    print("Back Track")
                     nodeNumber = nodeNumber - 1
-                    colorValue = 0
-                    del colorList[nodeNumber]
-                    #nodeNumber = nodeNumber - 1
-                    #del colorList[nodeNumber]
-                    #colorValue = 0
-        else:
-            break
-        
-    
-    print(colorList)
+                    colorToDelete = colorNode.get(nodeNumber)
+                    print(colorToDelete)
+                    tempColorList = copy.deepcopy(listOfColor)
+                    tempColorList.remove(colorToDelete)
+                    colorNode.pop(nodeNumber)
+                    print("<><><><><><><>" + str(tempColorList))
+                    print("Node" + str(nodeNumber))
+                    
             
-                
+    print (colorNode.items())                
    
 def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
     for i in range(totalVertices):
+      
+        if adjacent_matrix[nodeNumber][i] == 1:
+            if colorNumber in colorNode[i]:
+                return False
         
-        '''Testing
-        print("///////////////////////")
-        print(adjacent_matrix[nodeNumber][i])
-        print("///////////////////////")
-        '''
+    return True 
+'''
+        OldMethod
         if adjacent_matrix[nodeNumber][i] == 1:
             if not colorList:
                 return True
@@ -270,9 +274,9 @@ def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
                 else:
                     if colorNumber == colorList[i]:
                         return False
-                    
+                        '''        
                 
-    return True
+
                               
 def plot_graph():
     print(coords)
@@ -309,7 +313,7 @@ def unit_tests():
             
             
 def run_experiment():
-    generate_points(5)
+    generate_points(10)
     #for key, value in coords.items():
     #    print(key, value)
         
