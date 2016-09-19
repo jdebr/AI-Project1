@@ -51,6 +51,11 @@ distance = defaultdict(list)
 # {nodeID: [(nodeID, distance)...]}  
 
 
+domains = defaultdict(list)
+# Maps node ID to a list of color values that are legal for that node
+# {nodeID: [color1, color2, ...]}
+
+
 def generate_points(n):
     ''' Generates n sets of points randomly scattered on the 
     unit square and stores them as tuples mapped to integer IDs
@@ -290,7 +295,6 @@ def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
     and FALSE otherwise
     '''
     for i in range(totalVertices):
-      
         if adjacent_matrix[nodeNumber][i] == 1:
             if colorNumber in colorNode[i]:
                 return False
@@ -313,13 +317,83 @@ def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
 
 
 def modified_backtracking(numColors):
-    pass    
+    ''' Initial call for recursive backtracking algorithm
+    Returns True if coloring is successful,
+    else returns False
+    '''
+    colorNode.clear()
+    # Initialize colorNode dictionary for coloring_complete() method
+    for i in range(len(graph)):
+        colorNode[i] = []
+        
+    initialize_domains(numColors)
+    
+    # Begin recursion
+    return recursive_backtracking(numColors)    
 
 
 def recursive_backtracking(numColors):
-    pass
-                
+    ''' The recursive backtracking algorithm from Russell & Norvig pg 219.
+    Returns True if coloring is successful,
+    else returns False
+    '''
+    # Base Case
+    if coloring_complete():
+        print("Coloring Completed!")
+        return True
+    # Select Unassigned Variable, use MRV heuristic?
+    currentNode = select_mrv()
+    # Iterate through colors available for currentNode
+    for color in domains[currentNode]:
+        if checkAndAssignColor(currentNode, len(graph), color):
+            colorNode[currentNode].append(color)
+            # INFERENCE STEP HERE
+            # Recursive call
+            result = recursive_backtracking(numColors)
+            if result:
+                return result
+        # We backtracked if we reach here so remove that color assignment
+        colorNode[currentNode] = []    
+        
+    return False
 
+
+def select_mrv():
+    ''' Select an uncolored node with the smallest domain, 
+    return its ID
+    '''
+    selectedID = -1
+    # Start with an uncolored node with a nonzero domain
+    for i in range(len(graph)):
+        if not colorNode[i] and len(domains[i]) > 0:
+            selectedID = i
+    
+    # Check all uncolored nodes for a smaller nonzero domain
+    for node, domain in domains.items():
+        if not colorNode[node] and len(domain) > 0:
+            if len(domain) < len(domains[selectedID]):
+                selectedID = node
+                
+    return selectedID
+
+
+def coloring_complete():
+    ''' Returns true if all nodes have been assigned a color in colorNodes,
+    else returns false
+    '''
+    for nodes, colors in colorNode.items():
+        if not colors:
+            return False
+    return True
+
+
+def initialize_domains(numColors):
+    ''' Initializes the color domains for each node in the graph '''
+    domains.clear()
+    for i in range(len(graph)):
+        for j in range(numColors):
+            domains[i].append(j)
+                   
                               
 def plot_graph():
     print(coords)
@@ -364,7 +438,7 @@ def unit_tests():
         for node2 in v:
             if colorNode[node1] == colorNode[node2]:
                 print("Adjacent nodes have same color!")
-                print("Node 1: " + str(node1) + ", Node 2: " + str(node2))
+                print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
                 tests_passed = False
                 
     if tests_passed:
@@ -384,8 +458,8 @@ def run_experiment():
     
     # Connect Edges
     build_graph()
-    #print("Graph:")
-    #print(graph.items())
+    print("Graph:")
+    print(graph.items())
     
     # Show Visual Plot
     #plot_graph()
@@ -396,11 +470,17 @@ def run_experiment():
     #print(adjacent_matrix.items())
     
     # Run Simple Backtracking
-    print("Running Simple Backtracking")
-    BackTracking(4)
-    #print("Color Assignments:")
-    #print(colorNode.items())     
-     
+    #print("Running Simple Backtracking")
+    #BackTracking(4)
+       
+    
+    # Run Backtracking w/ Forward Checking
+    print("Running Backtracking w/ Forward Checking")
+    print(modified_backtracking(4)) 
+    
+    print("Color Assignments:")
+    print(colorNode.items())  
+       
        
 def main():
     run_experiment()
