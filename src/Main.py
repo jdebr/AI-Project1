@@ -26,17 +26,20 @@ colorNode = defaultdict(list)
 # Maps node ID to some color value
 # {nodeID: 'color'}
 
+
 colorNodeChecker = defaultdict(list)
 # Maps node ID to some color value
 # {nodeID: 'color'}
+
 
 colorList = []
 listOfColor = []
 #Maps vertex number to key value
 
 
-#Adjacency Matrix
 adjacent_matrix = defaultdict(list)
+#Adjacency Matrix
+
 
 coords = {}
 # Maps node ID to a tuple representing Cartesian coordinates
@@ -48,10 +51,17 @@ distance = defaultdict(list)
 # {nodeID: [(nodeID, distance)...]}  
 
 
+domains = defaultdict(list)
+# Maps node ID to a list of color values that are legal for that node
+# {nodeID: [color1, color2, ...]}
+
+
 def generate_points(n):
     ''' Generates n sets of points randomly scattered on the 
     unit square and stores them as tuples mapped to integer IDs
     '''
+    coords.clear()
+    
     for i in range(n):
         randX = random.randint(1, 10000)
         randY = random.randint(1, 10000)
@@ -64,6 +74,8 @@ def calculate_distances():
     storing as a dictionary of lists of tuples, then sorting
     the lists by distance
     '''
+    distance.clear()
+    
     for i in range(len(coords)):
         for j in range(i + 1, len(coords)):
             # Calculate distance from i to j, 
@@ -83,6 +95,8 @@ def build_graph():
     ''' Add edges to graph by selecting a random point and adding 
     an edge to the nearest point that doesn't already have an edge
     and such that it will not cross any other edge'''
+    graph.clear()
+    
     lines = []
     # List of existing line segments (edges on graph)
     # [(A, B, C, x1, y1, x2, y2) ...]
@@ -192,13 +206,12 @@ def build_graph():
 
 
 def matrix_creation():
-    available_nodes_coloring = list(graph.keys())
-    print("Node's to Color " + str(available_nodes_coloring))
+    '''This is the block where adjacency matrix is made'''
+    adjacent_matrix.clear()
     
-    '''
-    this can go in another function or maybe used by other algorithms.
-    This is the block where adjacency matrix is made
-    '''
+    available_nodes_coloring = list(graph.keys())
+    #print("Node's to Color " + str(available_nodes_coloring))
+        
     while available_nodes_coloring:
         random_point = random.choice(available_nodes_coloring)
         '''
@@ -207,82 +220,81 @@ def matrix_creation():
         '''
         for i in range(len(graph)):
             if i == random_point:
-                adjacent_matrix[random_point].append(1)
+                adjacent_matrix[random_point].append(0)
             elif i not in graph[random_point] and random_point not in graph[i]:
                 adjacent_matrix[random_point].append(0)
             else:
                 adjacent_matrix[random_point].append(1)
         available_nodes_coloring.remove(random_point)   
-    print(adjacent_matrix.items())
-    BackTracking()
     
 
-def BackTracking():
-    #This needs to be asked during graph point generation
-    numberOfColors = 4
+def BackTracking(numberOfColors):
+    ''' Simple Backtracking Algorithm Start '''
     for i in range(numberOfColors):
         listOfColor.append(i)
+        
     numberOfVertices = len(adjacent_matrix)
     tempColorList = copy.deepcopy(listOfColor)
     nodeNumber = 0
-    print("Temp Color List " + str(tempColorList))
+    #print("Temp Color List " + str(tempColorList))
     while nodeNumber < len(adjacent_matrix):
-        print("Node selected " + str(nodeNumber))
+        #print("Node selected " + str(nodeNumber))
         for colors in range(len(listOfColor)):
             randomColor = tempColorList[random.randrange(len(tempColorList))]
-            print("Color selected is " + str(randomColor))
+            #print("Color selected is " + str(randomColor))
             if checkAndAssignColor(nodeNumber, numberOfVertices, randomColor):
                 colorNode[nodeNumber].append(randomColor)
-                print("Temp Color List 2 " + str(tempColorList))
-                print("Test this " + str(colorNode.items()))
+                #print("Temp Color List 2 " + str(tempColorList))
+                #print("Test this " + str(colorNode.items()))
                 tempColorList = copy.deepcopy(listOfColor)
-                print("Temp Color List 3 " + str(tempColorList))
+                #print("Temp Color List 3 " + str(tempColorList))
                 nodeNumber = nodeNumber + 1
                 break
 
             else:
                 tempColorList.remove(randomColor)
-                print("Temp Color List 4 " + str(tempColorList))                
+                #print("Temp Color List 4 " + str(tempColorList))                
                 if colors + 1 == len(listOfColor) or not tempColorList:
-                    print("Back Track")
+                    #print("Back Track")
                     nodeNumber = nodeNumber - 1                   
                     colorToDelete = colorNode.__getitem__(nodeNumber)
-                    print("Current Node Working " + str(nodeNumber))
+                    #print("Current Node Working " + str(nodeNumber))
                     
                     colorToDelete = str(colorToDelete).replace('[', '').replace(']', '')
                     
                     colorInt = int(colorToDelete)
-                    print(colorInt)
+                    #print(colorInt)
                     
                     colorNode.pop(nodeNumber)
                     if colorInt not in colorNodeChecker[nodeNumber]:
                         colorNodeChecker[nodeNumber].append(colorInt)
-                        print("Color Node checker " + str(colorNodeChecker.items()))
+                        #print("Color Node checker " + str(colorNodeChecker.items()))
                         for key, values in colorNodeChecker.items():
                             tempColorList = copy.deepcopy(listOfColor)
                             for values in colorNodeChecker[nodeNumber]:
-                                print("Temp Color List 5 " + str(tempColorList))
-                                print(values)
+                                #print("Temp Color List 5 " + str(tempColorList))
+                                #print(values)
                                 tempColorList.remove(values)
                     else:
-                        print("Color Node checker " + str(colorNodeChecker.items()))
+                        #print("Color Node checker " + str(colorNodeChecker.items()))
                         for key, values in colorNodeChecker.items():
                             tempColorList = copy.deepcopy(listOfColor)
                             for values in colorNodeChecker[nodeNumber]:
-                                print("Temp Color List 6 " + str(tempColorList))
-                                print(values)
+                                #print("Temp Color List 6 " + str(tempColorList))
+                                #print(values)
                                 tempColorList.remove(values)
                                             
-                    print("<><><><><><><>" + str(tempColorList))
-                    print("Node" + str(nodeNumber))
+                    #print("<><><><><><><>" + str(tempColorList))
+                    #print("Node" + str(nodeNumber))
                     break
-                    
-            
-    print (colorNode.items())                
+                               
    
 def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
+    ''' For node ID nodeNumber and the number of vertices in the graph totalVertices,
+    returns TRUE if no adjacent vertices already have the color represented by colorNumber,
+    and FALSE otherwise
+    '''
     for i in range(totalVertices):
-      
         if adjacent_matrix[nodeNumber][i] == 1:
             if colorNumber in colorNode[i]:
                 return False
@@ -301,9 +313,87 @@ def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
                 else:
                     if colorNumber == colorList[i]:
                         return False
-                        '''        
-                
+                        '''    
 
+
+def modified_backtracking(numColors):
+    ''' Initial call for recursive backtracking algorithm
+    Returns True if coloring is successful,
+    else returns False
+    '''
+    colorNode.clear()
+    # Initialize colorNode dictionary for coloring_complete() method
+    for i in range(len(graph)):
+        colorNode[i] = []
+        
+    initialize_domains(numColors)
+    
+    # Begin recursion
+    return recursive_backtracking(numColors)    
+
+
+def recursive_backtracking(numColors):
+    ''' The recursive backtracking algorithm from Russell & Norvig pg 219.
+    Returns True if coloring is successful,
+    else returns False
+    '''
+    # Base Case
+    if coloring_complete():
+        print("Coloring Completed!")
+        return True
+    # Select Unassigned Variable, use MRV heuristic?
+    currentNode = select_mrv()
+    # Iterate through colors available for currentNode
+    for color in domains[currentNode]:
+        if checkAndAssignColor(currentNode, len(graph), color):
+            colorNode[currentNode].append(color)
+            # INFERENCE STEP HERE
+            # Recursive call
+            result = recursive_backtracking(numColors)
+            if result:
+                return result
+        # We backtracked if we reach here so remove that color assignment
+        colorNode[currentNode] = []    
+        
+    return False
+
+
+def select_mrv():
+    ''' Select an uncolored node with the smallest domain, 
+    return its ID
+    '''
+    selectedID = -1
+    # Start with an uncolored node with a nonzero domain
+    for i in range(len(graph)):
+        if not colorNode[i] and len(domains[i]) > 0:
+            selectedID = i
+    
+    # Check all uncolored nodes for a smaller nonzero domain
+    for node, domain in domains.items():
+        if not colorNode[node] and len(domain) > 0:
+            if len(domain) < len(domains[selectedID]):
+                selectedID = node
+                
+    return selectedID
+
+
+def coloring_complete():
+    ''' Returns true if all nodes have been assigned a color in colorNodes,
+    else returns false
+    '''
+    for nodes, colors in colorNode.items():
+        if not colors:
+            return False
+    return True
+
+
+def initialize_domains(numColors):
+    ''' Initializes the color domains for each node in the graph '''
+    domains.clear()
+    for i in range(len(graph)):
+        for j in range(numColors):
+            domains[i].append(j)
+                   
                               
 def plot_graph():
     print(coords)
@@ -326,6 +416,10 @@ def plot_graph():
     
     
 def unit_tests():
+    tests_passed = True
+    
+    # Graph creation test
+    '''
     for i in range(1000):
         generate_points(3)
         calculate_distances()
@@ -336,32 +430,61 @@ def unit_tests():
         
         if x != 3:
             print("Num Edges: " + str(x))
-            print("Error")
+            tests_passed = False
+    '''
+    
+    # Successful coloring test
+    for node1, v in graph.items():
+        for node2 in v:
+            if colorNode[node1] == colorNode[node2]:
+                print("Adjacent nodes have same color!")
+                print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
+                tests_passed = False
+                
+    if tests_passed:
+        print("Unit tests successfully passed!")
             
             
 def run_experiment():
+    # Scatter Points
     generate_points(10)
-    #for key, value in coords.items():
-    #    print(key, value)
-        
-    calculate_distances()
-    #print(distance)
+    #print("Coordinates:")
+    #print(coords.items())
     
+    # Determine Euclidean Distances
+    calculate_distances()    
+    #print("Euclidean Distances")
+    #print(distance.items())
     
+    # Connect Edges
     build_graph()
-    #for key, value in graph.items():
-    #print("Node " + str(key) + " connected to nodes: " + str(value))
-    plot_graph()
+    print("Graph:")
+    print(graph.items())
+    
+    # Show Visual Plot
+    #plot_graph()
+    
+    # Create Adjacency Matrix
     matrix_creation()
+    #print("Adj Matrix:")
+    #print(adjacent_matrix.items())
     
+    # Run Simple Backtracking
+    #print("Running Simple Backtracking")
+    #BackTracking(4)
+       
     
-            
-
+    # Run Backtracking w/ Forward Checking
+    print("Running Backtracking w/ Forward Checking")
+    print(modified_backtracking(4)) 
     
-        
+    print("Color Assignments:")
+    print(colorNode.items())  
+       
+       
 def main():
     run_experiment()
-    #unit_tests()
+    unit_tests()
     
     
 if __name__ == '__main__':
