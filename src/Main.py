@@ -549,6 +549,8 @@ def run_experiment():
         # Run Simple Backtracking
         #print("Running Simple Backtracking")
         #BackTracking(4)
+        #Run Population creation for GA
+        populationCreation(4,20)
            
         
         # Run Backtracking w/ Forward Checking
