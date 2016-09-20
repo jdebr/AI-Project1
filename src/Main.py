@@ -60,6 +60,13 @@ domains = defaultdict(list)
 OP_COUNT = 0
 # Counter to track number of times a node is assigned a color within an algorithm
 
+#Population array containing chromosome number as cell value
+population = defaultdict(list)
+
+#chromosome containing node as index value and color as cell value. It can be a dictionary too.
+chromosome = []
+
+
 
 def generate_points(n):
     ''' Generates n sets of points randomly scattered on the 
@@ -234,92 +241,140 @@ def matrix_creation():
     
 
 def BackTracking(numberOfColors):
-    ''' Simple Backtracking Algorithm Start '''
+    #This needs to be asked during graph point generation
+    #numberOfColors = 4
+    
     for i in range(numberOfColors):
         listOfColor.append(i)
-        
     numberOfVertices = len(adjacent_matrix)
     tempColorList = copy.deepcopy(listOfColor)
     nodeNumber = 0
-    #print("Temp Color List " + str(tempColorList))
+    
+    print("Temp  Color List 1 " + str(tempColorList))
     while nodeNumber < len(adjacent_matrix):
-        #print("Node selected " + str(nodeNumber))
+        print("Node selected " + str(nodeNumber))
+        
+        if nodeNumber == 0 and not tempColorList:
+            print("Game Over!!")
+            break
+                 
         for colors in range(len(listOfColor)):
             randomColor = tempColorList[random.randrange(len(tempColorList))]
-            #print("Color selected is " + str(randomColor))
+            
+            print("Color selected for assigning is " + str(randomColor))
+            
             if checkAndAssignColor(nodeNumber, numberOfVertices, randomColor):
                 colorNode[nodeNumber].append(randomColor)
-                #print("Temp Color List 2 " + str(tempColorList))
-                #print("Test this " + str(colorNode.items()))
+                print("Testing of Main ColorNode " + str(colorNode.items()))
                 tempColorList = copy.deepcopy(listOfColor)
-                #print("Temp Color List 3 " + str(tempColorList))
+                print("Temp Color List re-copy in case half empty and if not still, if all is well " + str(tempColorList))
                 nodeNumber = nodeNumber + 1
                 break
-
+            
+            #Brain of Back track
             else:
                 tempColorList.remove(randomColor)
-                #print("Temp Color List 4 " + str(tempColorList))                
+                print("Temp Color List in the first else block after removing color " + str(tempColorList))
+                
                 if colors + 1 == len(listOfColor) or not tempColorList:
-                    #print("Back Track")
-                    nodeNumber = nodeNumber - 1                   
+                    
+                    
+                    print("Back Track Enter")
+                    
+                    nodeNumber = nodeNumber - 1
+                    #To get the color Number of previous Node                   
                     colorToDelete = colorNode.__getitem__(nodeNumber)
-                    #print("Current Node Working " + str(nodeNumber))
-                    
-                    colorToDelete = str(colorToDelete).replace('[', '').replace(']', '')
-                    
+                    print("Current Node Working and Popping from main " + str(nodeNumber))
+                    #Converting to int for popping and Removing the brackets from color number
+                    colorToDelete = str(colorToDelete).replace('[', '').replace(']', '')                    
                     colorInt = int(colorToDelete)
-                    #print(colorInt)
-                    
+                    print("Color to delete is " + str(colorInt))
                     colorNode.pop(nodeNumber)
-                    if colorInt not in colorNodeChecker[nodeNumber]:
+                    print("Main color node after popping " + str(colorNode.items()))
+                    
+                    if colorInt not in colorNodeChecker[nodeNumber] or nodeNumber not in colorNodeChecker:
+                        
                         colorNodeChecker[nodeNumber].append(colorInt)
-                        #print("Color Node checker " + str(colorNodeChecker.items()))
-                        for key, values in colorNodeChecker.items():
-                            tempColorList = copy.deepcopy(listOfColor)
-                            for values in colorNodeChecker[nodeNumber]:
-                                #print("Temp Color List 5 " + str(tempColorList))
-                                #print(values)
-                                tempColorList.remove(values)
+                        print("Color Node checker after appending and in if block " + str(colorNodeChecker.items()))
+                        tempColorList = copy.deepcopy(listOfColor)
+                        for values in colorNodeChecker[nodeNumber]:
+                            print("Temp Color List before popping " + str(tempColorList))
+                            print("Color values " + str(values))
+                            tempColorList.remove(values)
+                            
                     else:
-                        #print("Color Node checker " + str(colorNodeChecker.items()))
-                        for key, values in colorNodeChecker.items():
-                            tempColorList = copy.deepcopy(listOfColor)
-                            for values in colorNodeChecker[nodeNumber]:
-                                #print("Temp Color List 6 " + str(tempColorList))
-                                #print(values)
-                                tempColorList.remove(values)
-                                            
-                    #print("<><><><><><><>" + str(tempColorList))
-                    #print("Node" + str(nodeNumber))
+                        print("Color Node checker in else block" + str(colorNodeChecker.items()))
+                        tempColorList = copy.deepcopy(listOfColor)
+                        for values in colorNodeChecker[nodeNumber]:
+                            print("Temp Color List in else before popping " + str(tempColorList))
+                            print(values)
+                            tempColorList.remove(values)
+                            
+                            
+                    if not tempColorList and len(colorNodeChecker[nodeNumber]) == numberOfColors:
+                        print("Special case start")
+                        colorNodeChecker.pop(nodeNumber) 
+                        nodeNumber = nodeNumber - 1                       
+                        tempColorList = copy.deepcopy(listOfColor)
+                        specialColorToDelete = colorNode.__getitem__(nodeNumber)
+                        print("Current Node Working and Popping " + str(nodeNumber))
+                        #Converting to int for popping and Removing the brackets from color number
+                        specialColorToDelete = str(specialColorToDelete).replace('[', '').replace(']', '')                    
+                        specialColorInt = int(specialColorToDelete)
+                        print("Color to delete is " + str(specialColorInt))
+                        colorNode.pop(nodeNumber)
+                        tempColorList.remove(specialColorInt)
+                        if colorInt not in colorNodeChecker[nodeNumber]:
+                            colorNodeChecker[nodeNumber].append(specialColorInt)
+                    
+                        #colorNode.pop(nodeNumber)
+                        print("Main color node after popping " + str(colorNode.items()))
+                        print("Special case end")
+                                           
+                    print("<><><><><><><> after popping " + str(tempColorList))
+                    print("Node before exiting" + str(nodeNumber))
                     break
-                               
+                
+                elif nodeNumber == 0 and not tempColorList:
+                    print("No more Possible Solutions")
+                    break
+                    
+            
+    print ("Final List ending backtrack " + str(colorNode.items()))                
    
 def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
-    ''' For node ID nodeNumber and the number of vertices in the graph totalVertices,
-    returns TRUE if no adjacent vertices already have the color represented by colorNumber,
-    and FALSE otherwise
-    '''
     for i in range(totalVertices):
+      
         if adjacent_matrix[nodeNumber][i] == 1:
             if colorNumber in colorNode[i]:
                 return False
         
-    return True 
-'''
-        OldMethod
-        if adjacent_matrix[nodeNumber][i] == 1:
-            if not colorList:
-                return True
-            else:
-                lengthOfColorArray = len(colorList)
-                print(lengthOfColorArray)
-                if i >= lengthOfColorArray:
-                    pass
-                else:
-                    if colorNumber == colorList[i]:
-                        return False
-                        '''    
+    return True
 
+
+#Genetic Algorithm Begins
+def populationCreation(totalColor, noOfChromosome):
+    
+    
+    for i in range(totalColor):
+        listOfColor.append(i)
+        
+    for key in range(noOfChromosome):
+        if not chromosome:
+            for i in range(len(coords.items())):
+                chromosome.append(listOfColor[random.randrange(len(listOfColor))])   
+        
+        else:
+            chromosome[:] = []
+            for i in range(len(coords.items())):
+                chromosome.append(listOfColor[random.randrange(len(listOfColor))])
+        print("Chromosome is ")
+        print(chromosome)
+        tempchromosome = copy.deepcopy(chromosome)
+        population[key].append(tempchromosome)
+ 
+    print("Final Population is ")
+    print(population)
 
 def modified_backtracking(numColors):
     ''' Initial call for recursive backtracking algorithm
