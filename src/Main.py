@@ -13,6 +13,7 @@ import math
 from collections import defaultdict
 import matplotlib.pyplot as py
 import copy
+import datetime
 
 
 
@@ -54,6 +55,10 @@ distance = defaultdict(list)
 domains = defaultdict(list)
 # Maps node ID to a list of color values that are legal for that node
 # {nodeID: [color1, color2, ...]}
+
+
+OP_COUNT = 0
+# Counter to track number of times a node is assigned a color within an algorithm
 
 
 def generate_points(n):
@@ -321,11 +326,13 @@ def modified_backtracking(numColors):
     Returns True if coloring is successful,
     else returns False
     '''
+    # INITIALIZATION OF GLOBALS
+    # Clear color nodes
     colorNode.clear()
     # Initialize colorNode dictionary for coloring_complete() method
     for i in range(len(graph)):
         colorNode[i] = []
-        
+    # Initialize domain values
     initialize_domains(numColors)
     
     # Begin recursion
@@ -347,6 +354,8 @@ def recursive_backtracking(numColors):
     for color in domains[currentNode]:
         if checkAndAssignColor(currentNode, len(graph), color):
             colorNode[currentNode].append(color)
+            # Track number of node colorings
+            incr_op_count()
             # INFERENCE STEP HERE
             # Recursive call
             result = recursive_backtracking(numColors)
@@ -415,8 +424,18 @@ def plot_graph():
     py.show()
     
     
+def get_time():
+    return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+
+def incr_op_count():
+    global OP_COUNT
+    OP_COUNT = OP_COUNT + 1
+    
+    
 def unit_tests():
     tests_passed = True
+    global OP_COUNT
     
     # Graph creation test
     '''
@@ -443,48 +462,55 @@ def unit_tests():
                 
     if tests_passed:
         print("Unit tests successfully passed!")
-            
+        print("Total Operations: ")
+        print(OP_COUNT)
+    OP_COUNT = 0
+    
             
 def run_experiment():
-    # Scatter Points
-    generate_points(10)
-    #print("Coordinates:")
-    #print(coords.items())
-    
-    # Determine Euclidean Distances
-    calculate_distances()    
-    #print("Euclidean Distances")
-    #print(distance.items())
-    
-    # Connect Edges
-    build_graph()
-    print("Graph:")
-    print(graph.items())
-    
-    # Show Visual Plot
-    #plot_graph()
-    
-    # Create Adjacency Matrix
-    matrix_creation()
-    #print("Adj Matrix:")
-    #print(adjacent_matrix.items())
-    
-    # Run Simple Backtracking
-    #print("Running Simple Backtracking")
-    #BackTracking(4)
-       
-    
-    # Run Backtracking w/ Forward Checking
-    print("Running Backtracking w/ Forward Checking")
-    print(modified_backtracking(4)) 
-    
-    print("Color Assignments:")
-    print(colorNode.items())  
+    for i in range(1, 11):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        
+        # Connect Edges
+        build_graph()
+        
+        # Show Visual Plot
+        #plot_graph()
+        
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Simple Backtracking
+        #print("Running Simple Backtracking")
+        #BackTracking(4)
+           
+        
+        # Run Backtracking w/ Forward Checking
+        print("Running Backtracking w/ Forward Checking - " + str(num_points))
+        print(get_time())
+        print(modified_backtracking(4)) 
+        print(get_time())
+        #print("Color Assignments:")
+        #print(colorNode.items())  
+        
+        unit_tests()
        
        
 def main():
     run_experiment()
-    unit_tests()
+    #unit_tests()
+    #plot_graph()
     
     
 if __name__ == '__main__':
