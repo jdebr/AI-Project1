@@ -241,7 +241,7 @@ def matrix_creation():
         available_nodes_coloring.remove(random_point)   
     
 
-def BackTracking(numberOfColors):
+def NonRecursiveSimpleBackTracking(numberOfColors):
     #This needs to be asked during graph point generation
     #numberOfColors = 4
     
@@ -341,7 +341,35 @@ def BackTracking(numberOfColors):
                     break
                     
             
-    print ("Final List ending backtrack " + str(colorNode.items()))                
+    print ("Final List ending backtrack " + str(colorNode.items()))
+
+
+def RecursiveSimpleBackTracking(numberOfColors,nodeNumber):
+    if not (brainBackTracking(numberOfColors,nodeNumber)):
+        print("Sorry No Solution")
+        return False
+    
+    print(colorNode)
+    return True
+        
+    
+    
+def brainBackTracking(numberOfColors, nodeNumber):
+    for i in range(numberOfColors):
+        if nodeNumber == len(adjacent_matrix):
+            return True
+        if(checkAndAssignColor(nodeNumber, len(adjacent_matrix), i)):
+            colorNode[nodeNumber].append(i)
+            
+            if brainBackTracking(numberOfColors, nodeNumber + 1):
+                return True
+                            
+            colorNode.pop(nodeNumber)
+            
+    return False
+
+    print("final Colors")
+    print(colorNode)
    
 def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
     for i in range(totalVertices):
@@ -363,19 +391,47 @@ def populationCreation(totalColor, noOfChromosome):
     for key in range(noOfChromosome):
         if not chromosome:
             for i in range(len(coords.items())):
-                chromosome.append(listOfColor[random.randrange(len(listOfColor))])   
+                chromosome.append(random.randrange(len(listOfColor)))   
         
         else:
             chromosome[:] = []
             for i in range(len(coords.items())):
-                chromosome.append(listOfColor[random.randrange(len(listOfColor))])
+                chromosome.append(random.randrange(len(listOfColor)))
         print("Chromosome is ")
         print(chromosome)
         tempchromosome = copy.deepcopy(chromosome)
         population[key].append(tempchromosome)
- 
+        
+     
     print("Final Population is ")
     print(population)
+    parentSelection(noOfChromosome)           
+        
+def parentSelection(noOfChromosome):
+    '''
+    We select two random temporary parents  from the chromosome and find the fitness and discard the unfit
+    and this process is repeated again for the selection of parent 2.
+    '''
+    tempParent = defaultdict(list)
+    tempPopulation = copy.deepcopy(population)
+    for i in range(2):
+        tempParent[i].append(random.randrange(len(tempPopulation)))
+        print(tempParent[i])
+        keyDeletion = tempParent[i]
+        keyDeletion = str(keyDeletion).replace('[', '').replace(']', '')                    
+        keyDeletionInt = int(keyDeletion)
+        tempPopulation.pop(keyDeletionInt)
+        
+    print("Temporary Parent List " + str(tempParent))
+    print("Temp Population " + str(tempPopulation))
+    '''
+    We need to calculate fitness of the selected parents and pop the fit one from the main population
+    '''
+    calculateFitness()
+
+    
+def calculateFitness():
+    pass    
     
 
 def modified_backtracking(numColors, backtrack_type = "simple"):
