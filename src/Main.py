@@ -414,26 +414,53 @@ def recursive_backtracking(numColors, backtrack_type):
             # Track number of node colorings
             incr_op_count()
             # INFERENCE STEP HERE
+            inf = True
             if backtrack_type == "forward":
-                forward_check()
+                inf = forward_check(currentNode, color)
             elif backtrack_type == "mac":
-                mac()
-            # Recursive call
-            result = recursive_backtracking(numColors, backtrack_type)
-            if result:
-                return result
+                inf = mac()
+            # If inferences do not result in a failed coloring
+            if inf:
+                # Recursive call
+                result = recursive_backtracking(numColors, backtrack_type)
+                if result:
+                    return result
         # We backtracked if we reach here so remove that color assignment
         colorNode[currentNode] = []    
         
     return False
 
 
-def forward_check():
-    pass
+def forward_check(nodeID, color):
+    ''' Removes a recently assigned color from the domains of all unassigned
+    adjacent nodes.  If this leaves any domains empty, undoes this process and 
+    returns false.  Else returns true.
+    '''
+    altered = [] # local list to track node IDs for domains we change
+    
+    # Check all nodes for adjacency to current node and no color assignment
+    for i in range(len(graph)):
+        if adjacent_matrix[nodeID][i] == 1 and not colorNode[i]:
+            # Remove from those nodes' domains the current color value
+            if color in domains[i]:
+                domains[i].remove(color)
+                altered.append(i)
+                
+    # Check for empty domains
+    for i in range(len(graph)):
+        if not domains[i]:
+            # If domain is empty, undo our domain change and return false
+            print("Empty domain! Adding colors back")
+            for j in altered:
+                domains[j].append(color)
+            return False
+        
+    # Otherwise keep domain changes and return true
+    return True
 
 
 def mac():
-    pass
+    return True
 
 
 def select_mrv():
@@ -560,6 +587,7 @@ def run_experiment_simple_backtracking(num_colors):
         #print(adjacent_matrix.items())
         
         # Run Simple Backtracking
+        print("##############################################################")
         print("Running Simple Backtracking  - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
         print(get_time())
@@ -571,7 +599,7 @@ def run_experiment_simple_backtracking(num_colors):
         
 def run_experiment_backtracking_forward_checking(num_colors):
     for i in range(1, 11):
-        num_points = i * 10
+        num_points = 10
         # Scatter Points
         generate_points(num_points)
         #print("Coordinates:")
@@ -588,6 +616,7 @@ def run_experiment_backtracking_forward_checking(num_colors):
         #print(adjacent_matrix.items())
         
         # Run Backtracking w/ FC
+        print("##############################################################")
         print("Running Backtracking w/ Forward Checking - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
         print(get_time())
@@ -616,6 +645,7 @@ def run_experiment_backtracking_MAC(num_colors):
         #print(adjacent_matrix.items())
         
         # Run Backtracking w/ MAC
+        print("##############################################################")
         print("Running Backtracking w/ MAC - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
         print(get_time())
@@ -627,12 +657,12 @@ def run_experiment_backtracking_MAC(num_colors):
        
 def main():
     #run_experiment_simple_backtracking(3)
-    run_experiment_simple_backtracking(4)
+    #run_experiment_simple_backtracking(4)
     #run_experiment_backtracking_forward_checking(3)
-    #run_experiment_backtracking_forward_checking(4)
+    run_experiment_backtracking_forward_checking(4)
     #run_experiment_backtracking_MAC(3)
     #run_experiment_backtracking_MAC(4)
-    
+    pass
     
 if __name__ == '__main__':
     main()
