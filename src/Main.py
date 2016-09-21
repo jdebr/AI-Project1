@@ -75,8 +75,8 @@ def generate_points(n):
     coords.clear()
     
     for i in range(n):
-        randX = random.randint(1, 10000)
-        randY = random.randint(1, 10000)
+        randX = random.randint(1, 1000000)
+        randY = random.randint(1, 1000000)
         v = (float(randX), float(randY))
         coords[i] = v 
         
@@ -375,11 +375,12 @@ def populationCreation(totalColor, noOfChromosome):
  
     print("Final Population is ")
     print(population)
+    
 
-def modified_backtracking(numColors):
-    ''' Initial call for recursive backtracking algorithm
-    Returns True if coloring is successful,
-    else returns False
+def modified_backtracking(numColors, backtrack_type = "simple"):
+    ''' Initial call for recursive backtracking algorithm, takes number of colors we are 
+    using and type ("simple," "forward", "mac") as parameters.
+    Returns True if coloring is successful, else returns False
     '''
     # INITIALIZATION OF GLOBALS
     # Clear color nodes
@@ -391,13 +392,14 @@ def modified_backtracking(numColors):
     initialize_domains(numColors)
     
     # Begin recursion
-    return recursive_backtracking(numColors)    
+    return recursive_backtracking(numColors, backtrack_type)    
 
 
-def recursive_backtracking(numColors):
+def recursive_backtracking(numColors, backtrack_type):
     ''' The recursive backtracking algorithm from Russell & Norvig pg 219.
-    Returns True if coloring is successful,
-    else returns False
+    Takes number of colors and type of backtrack algorithm as parameters.
+    Called automatically by modified_backtracking() and itself.
+    Returns True if coloring is successful, else returns False
     '''
     # Base Case
     if coloring_complete():
@@ -412,14 +414,26 @@ def recursive_backtracking(numColors):
             # Track number of node colorings
             incr_op_count()
             # INFERENCE STEP HERE
+            if backtrack_type == "forward":
+                forward_check()
+            elif backtrack_type == "mac":
+                mac()
             # Recursive call
-            result = recursive_backtracking(numColors)
+            result = recursive_backtracking(numColors, backtrack_type)
             if result:
                 return result
         # We backtracked if we reach here so remove that color assignment
         colorNode[currentNode] = []    
         
     return False
+
+
+def forward_check():
+    pass
+
+
+def mac():
+    pass
 
 
 def select_mrv():
@@ -511,63 +525,113 @@ def unit_tests():
     for node1, v in graph.items():
         for node2 in v:
             if colorNode[node1] == colorNode[node2]:
-                print("Adjacent nodes have same color!")
-                print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
+                #print("Adjacent nodes have same color!")
+                #print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
                 tests_passed = False
                 
     if tests_passed:
         print("Unit tests successfully passed!")
         print("Total Operations: ")
         print(OP_COUNT)
+    else:
+        print("Unit tests failed!")
+        print("Total Operations: ")
+        print(OP_COUNT)
+        
     OP_COUNT = 0
     
             
-def run_experiment():
+def run_experiment_simple_backtracking(num_colors):
     for i in range(1, 11):
         num_points = i * 10
         # Scatter Points
         generate_points(num_points)
         #print("Coordinates:")
         #print(coords.items())
-        
         # Determine Euclidean Distances
         calculate_distances()    
         #print("Euclidean Distances")
         #print(distance.items())
-        
         # Connect Edges
         build_graph()
-        
-        # Show Visual Plot
-        #plot_graph()
-        
         # Create Adjacency Matrix
         matrix_creation()
         #print("Adj Matrix:")
         #print(adjacent_matrix.items())
         
         # Run Simple Backtracking
-        #print("Running Simple Backtracking")
+        print("Running Simple Backtracking  - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
-        #Run Population creation for GA
-        populationCreation(4,20)
-           
+        print(get_time())
+        print(modified_backtracking(num_colors, "simple")) 
+        print(get_time())
         
-        # Run Backtracking w/ Forward Checking
-        print("Running Backtracking w/ Forward Checking - " + str(num_points))
+        unit_tests()
+        
+        
+def run_experiment_backtracking_forward_checking(num_colors):
+    for i in range(1, 11):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Backtracking w/ FC
+        print("Running Backtracking w/ Forward Checking - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
         print(get_time())
-        print(modified_backtracking(4)) 
+        print(modified_backtracking(num_colors, "forward")) 
         print(get_time())
-        #print("Color Assignments:")
-        #print(colorNode.items())  
+        
+        unit_tests()
+        
+        
+def run_experiment_backtracking_MAC(num_colors):
+    for i in range(1, 11):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Backtracking w/ MAC
+        print("Running Backtracking w/ MAC - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        print(modified_backtracking(num_colors, "mac")) 
+        print(get_time())
         
         unit_tests()
        
        
 def main():
-    run_experiment()
-    #unit_tests()
-    #plot_graph()
+    #run_experiment_simple_backtracking(3)
+    run_experiment_simple_backtracking(4)
+    #run_experiment_backtracking_forward_checking(3)
+    #run_experiment_backtracking_forward_checking(4)
+    #run_experiment_backtracking_MAC(3)
+    #run_experiment_backtracking_MAC(4)
     
     
 if __name__ == '__main__':
