@@ -210,7 +210,7 @@ def init_graph_color(nb):
 def nb_conflicts(v, mat_adj) : 
     nb = 0
     for pts in mat_adj[v]:
-        if color[v] == color[pts] : 
+        if color[v] == color[pts] and mat_adj[v][pts] == 1: 
             nb= nb + 1
     conflicts[v] = nb
 
@@ -244,7 +244,7 @@ def minimize_conflicts(mat_adj, nb):
     print color
     new_nb_tot_conf = tot_conflicts(mat_adj)
     print "nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf)
-    while new_nb_tot_conf >= nb_tot_conf and conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] != 0:
+    while new_nb_tot_conf >= nb_tot_conf or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] != 0:
         color[max_conf] = col_max
         list_conf[max_conf] = 0
         max_conf = max(list_conf.iteritems(), key=operator.itemgetter(1))[0]
@@ -285,7 +285,7 @@ def unit_tests():
             
             
 def run_experiment():
-    generate_points(4)
+    generate_points(5)
     #for key, value in coords.items():
     #    print(key, value)  
     calculate_distances()
@@ -298,7 +298,7 @@ def run_experiment():
     #plot_graph()
     
     mat = creat_adgacent_matrix ()
-    min_conflicts(1000,4)
+    min_conflicts(100,4)
     print mat
     
         
