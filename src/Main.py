@@ -518,7 +518,32 @@ def forward_check(nodeID, color):
     return (True, altered)
 
 
-def mac():
+def mac(nodeID, color):
+    ''' An implementation of AC-3 for Arc Consistency from Russell & Norvig, pg 209.
+    Used by inference step of recursive backtracking for the Maintaining Arc Consistency
+    (MAC) inference for Recursive Backtracking.  
+    Returns false if some domain is reduced to empty set, else true.
+    '''
+    # Initialize Queue of arcs to check
+    
+    # Loop until Queue is empty
+    
+        # call revise function, if true
+            # check for empty domains, if found return false
+            # add arcs to queue
+            
+    return True
+
+
+def revise(node1, node2):
+    ''' Used by mac() (AC-3) to revise domains of nodes to enforce arc consistency.
+    Checks domain of node 2 for colors that can be consistent with each color in node 1's
+    domain, if not that color is removed from node 1's domain.
+    Returns true if domain is revised, else false. 
+    '''
+    # iterate domain of node 1, c
+        # if no color in domain of node 2 is consistent with c, remove c from domain 1, revised = true
+        
     return True
 
 
