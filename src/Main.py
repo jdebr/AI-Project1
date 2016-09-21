@@ -60,12 +60,13 @@ domains = defaultdict(list)
 OP_COUNT = 0
 # Counter to track number of times a node is assigned a color within an algorithm
 
-#Population array containing chromosome number as cell value
+
 population = defaultdict(list)
+#Population array containing chromosome number as cell value
 
-#chromosome containing node as index value and color as cell value. It can be a dictionary too.
+
 chromosome = []
-
+#chromosome containing node as index value and color as cell value. It can be a dictionary too.
 
 
 def generate_points(n):
@@ -413,30 +414,35 @@ def recursive_backtracking(numColors, backtrack_type):
             colorNode[currentNode].append(color)
             # Track number of node colorings
             incr_op_count()
-            # INFERENCE STEP HERE
-            inf = True
+            # INFERENCE STEP HERE - inf will contain boolean representing inference success
+            # and a list of altered node domains in case changes need to be reverted
+            inf = (True, [])
             if backtrack_type == "forward":
                 inf = forward_check(currentNode, color)
             elif backtrack_type == "mac":
                 inf = mac()
             # If inferences do not result in a failed coloring
-            if inf:
+            if inf[0]:
                 # Recursive call
                 result = recursive_backtracking(numColors, backtrack_type)
                 if result:
                     return result
-        # We backtracked if we reach here so remove that color assignment
-        colorNode[currentNode] = []    
+        # We backtracked if we reach here so remove that color assignment and undo inference changes
+        colorNode[currentNode] = []
+        for i in inf[1]:
+            domains[i].append(color)
+            
         
     return False
 
 
 def forward_check(nodeID, color):
     ''' Removes a recently assigned color from the domains of all unassigned
-    adjacent nodes.  If this leaves any domains empty, undoes this process and 
-    returns false.  Else returns true.
+    adjacent nodes.  Returns a tuple containing a boolean and a list of nodeIDs
+    for altered domains, where the boolean is false if some domain is empty and 
+    true otherwise.
     '''
-    altered = [] # local list to track node IDs for domains we change
+    altered = [] #local var to track changed nodes
     
     # Check all nodes for adjacency to current node and no color assignment
     for i in range(len(graph)):
@@ -449,14 +455,11 @@ def forward_check(nodeID, color):
     # Check for empty domains
     for i in range(len(graph)):
         if not domains[i]:
-            # If domain is empty, undo our domain change and return false
-            print("Empty domain! Adding colors back")
-            for j in altered:
-                domains[j].append(color)
-            return False
+            # If any domain is empty, return false
+            return (False, altered)
         
     # Otherwise keep domain changes and return true
-    return True
+    return (True, altered)
 
 
 def mac():
@@ -599,7 +602,7 @@ def run_experiment_simple_backtracking(num_colors):
         
 def run_experiment_backtracking_forward_checking(num_colors):
     for i in range(1, 11):
-        num_points = 10
+        num_points = i * 10
         # Scatter Points
         generate_points(num_points)
         #print("Coordinates:")
@@ -658,8 +661,8 @@ def run_experiment_backtracking_MAC(num_colors):
 def main():
     #run_experiment_simple_backtracking(3)
     #run_experiment_simple_backtracking(4)
-    #run_experiment_backtracking_forward_checking(3)
-    run_experiment_backtracking_forward_checking(4)
+    run_experiment_backtracking_forward_checking(3)
+    #run_experiment_backtracking_forward_checking(4)
     #run_experiment_backtracking_MAC(3)
     #run_experiment_backtracking_MAC(4)
     pass
