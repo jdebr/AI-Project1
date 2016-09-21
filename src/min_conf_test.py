@@ -10,16 +10,13 @@ graph = defaultdict(list)
 # node IDs that share an edge.
 # {nodeID: [nodeIDs...]}
 
-
 color = {}
 # Maps node ID to some color value
 # {nodeID: 'color'}
 
-
 coords = {}
 # Maps node ID to a tuple representing Cartesian coordinates
 # {nodeID: (x, y)}
-
 
 distance = defaultdict(list)
 # Maps node ID to a list of tuples which represent NodeID and distance 
@@ -27,7 +24,6 @@ distance = defaultdict(list)
 
 conflicts = {}
 #List of the number of conflic for each vertex 
-
 
 def generate_points(n):
     ''' Generates n sets of points randomly scattered on the 
@@ -177,9 +173,7 @@ def plot_graph():
     for i in range(len(coords)):
         xval.append(coords[i][0])
         yval.append(coords[i][1])
-    py.plot(xval, yval, 'or')
-    
-    
+    py.plot(xval, yval, 'or')   
     
     for pt, edges in graph.items():
         for pt2 in edges:
@@ -188,7 +182,6 @@ def plot_graph():
             py.plot(xval, yval)
     
     py.show()
-
     
 def creat_adgacent_matrix():   
     #init adjacent matrix
@@ -221,7 +214,7 @@ def nb_conflicts(v, mat_adj) :
             nb= nb + 1
     conflicts[v] = nb
 
-	
+#sum of all the conflicts 	
 def tot_conflicts(mat_adj):
     for v in graph :
         nb_conflicts(v,mat_adj)
@@ -251,9 +244,10 @@ def minimize_conflicts(mat_adj, nb):
     print color
     new_nb_tot_conf = tot_conflicts(mat_adj)
     print "nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf)
-    while new_nb_tot_conf >= nb_tot_conf and conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:
+    while new_nb_tot_conf >= nb_tot_conf and conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] != 0:
+        color[max_conf] = col_max
         list_conf[max_conf] = 0
-        max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+        max_conf = max(list_conf.iteritems(), key=operator.itemgetter(1))[0]
         print "max_conf " + str(max_conf)
         print "color" + str(color)
         print color[max_conf]
@@ -304,7 +298,7 @@ def run_experiment():
     #plot_graph()
     
     mat = creat_adgacent_matrix ()
-    min_conflicts(5000,4)
+    min_conflicts(1000,4)
     print mat
     
         
