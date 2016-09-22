@@ -892,7 +892,7 @@ def run_experiment_min_conflicts(num_colors):
         #print("Adj Matrix:")
         #print(adjacent_matrix.items())
         
-        # Run Backtracking w/ MAC
+        # Run Min Conflicts
         print("##############################################################")
         print("Running Min Conflicts - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
@@ -901,6 +901,34 @@ def run_experiment_min_conflicts(num_colors):
         print(get_time())
         
         min_conflict_unit_test()
+        
+        
+def run_experiment_genetic_algorithm(num_colors):
+    for i in range(1, 2):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run GA
+        print("##############################################################")
+        print("Running GA - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        populationCreation(num_colors, 20)
+        print(get_time())
+        
        
        
 def main():
@@ -912,6 +940,8 @@ def main():
     #run_experiment_backtracking_MAC(4)
     #run_experiment_min_conflicts(3)
     run_experiment_min_conflicts(4)
+    #run_experiment_genetic_algorithm(3)
+    #run_experiment_genetic_algorithm(4)
     pass
     
 if __name__ == '__main__':
