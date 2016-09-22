@@ -589,7 +589,7 @@ def recursive_backtracking(numColors, backtrack_type):
             # Track number of node colorings
             incr_op_count()
             # INFERENCE STEP HERE - inf will contain boolean representing inference success
-            # and a list of altered node domains in case changes need to be reverted
+            # and a dict of lists of altered node domains in case changes need to be reverted
             inf = (True, [])
             if backtrack_type == "forward":
                 inf = forward_check(currentNode, color)
@@ -603,8 +603,10 @@ def recursive_backtracking(numColors, backtrack_type):
                     return result
         # We backtracked if we reach here so remove that color assignment and undo inference changes
         colorNode[currentNode] = []
-        for i in inf[1]:
-            domains[i].append(color)
+        if backtrack_type != "simple":
+            for node , colors in inf[1].items():
+                for c in colors:
+                    domains[node].append(c)
             
         
     return False
@@ -616,7 +618,9 @@ def forward_check(nodeID, color):
     for altered domains, where the boolean is false if some domain is empty and 
     true otherwise.
     '''
-    altered = [] #local var to track changed nodes
+    altered = defaultdict(list) 
+    #local var to track changed nodes, maps node ID to list of colors removed from that 
+    #node's domain
     
     # Check all nodes for adjacency to current node and no color assignment
     for i in range(len(graph)):
@@ -624,7 +628,7 @@ def forward_check(nodeID, color):
             # Remove from those nodes' domains the current color value
             if color in domains[i]:
                 domains[i].remove(color)
-                altered.append(i)
+                altered[i].append(color)
                 
     # Check for empty domains
     for i in range(len(graph)):
@@ -938,13 +942,13 @@ def run_experiment_genetic_algorithm(num_colors):
        
 def main():
     #run_experiment_simple_backtracking(3)
-    #run_experiment_simple_backtracking(4)
+    run_experiment_simple_backtracking(4)
     #run_experiment_backtracking_forward_checking(3)
     #run_experiment_backtracking_forward_checking(4)
     #run_experiment_backtracking_MAC(3)
     #run_experiment_backtracking_MAC(4)
     #run_experiment_min_conflicts(3)
-    run_experiment_min_conflicts(4)
+    #run_experiment_min_conflicts(4)
     #run_experiment_genetic_algorithm(3)
     #run_experiment_genetic_algorithm(4)
     pass
