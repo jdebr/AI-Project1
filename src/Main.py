@@ -513,7 +513,7 @@ def parentSelection(noOfChromosome):
     We select two random temporary parents  from the chromosome and find the fitness and discard the unfit
     and this process is repeated again for the selection of parent 2.
     '''
-    tempParent = defaultdict(list)
+
     tempPopulation = copy.deepcopy(population)
     for i in range(2):
         tempParent[i].append(random.randrange(len(tempPopulation)))
@@ -545,7 +545,7 @@ def calculateFitness():
         tempParent.pop(0)
     else:
         tempParent.pop(1)
-    print("Final Parent is " + str(tempParent))   
+    print("Final Parent is " + str(tempParent))  
     
 
 def modified_backtracking(numColors, backtrack_type = "simple"):
