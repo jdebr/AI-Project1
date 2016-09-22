@@ -10,7 +10,7 @@ Project 1
 
 import random
 import math
-from collections import defaultdict
+from collections import defaultdict, deque
 import matplotlib.pyplot as py
 import copy
 import datetime
@@ -582,29 +582,43 @@ def recursive_backtracking(numColors, backtrack_type):
         return True
     # Select Unassigned Variable, use MRV heuristic?
     currentNode = select_mrv()
+    # Local variable for iterating through domains
+    currentDomain = copy.deepcopy(domains[currentNode])
+    # Local variable for inference results
+    inf = (True, [])
     # Iterate through colors available for currentNode
-    for color in domains[currentNode]:
+    for color in currentDomain:
         if checkAndAssignColor(currentNode, len(graph), color):
+            # Color the node 
             colorNode[currentNode].append(color)
+            # reduce the domain of that node to that color temporarily for MAC
+            restoreColors = []
+            for c in domains[currentNode]:
+                if c != color:
+                    restoreColors.append(c) 
+            for c in restoreColors:
+                domains[currentNode].remove(c)   
             # Track number of node colorings
             incr_op_count()
             # INFERENCE STEP HERE - inf will contain boolean representing inference success
             # and a dict of lists of altered node domains in case changes need to be reverted
-            inf = (True, [])
             if backtrack_type == "forward":
                 inf = forward_check(currentNode, color)
             elif backtrack_type == "mac":
-                inf = mac()
+                inf = mac(currentNode, color)
             # If inferences do not result in a failed coloring
             if inf[0]:
                 # Recursive call
                 result = recursive_backtracking(numColors, backtrack_type)
                 if result:
                     return result
+            # Restore domain of current node
+            for c in restoreColors:
+                domains[currentNode].append(c)
         # We backtracked if we reach here so remove that color assignment and undo inference changes
         colorNode[currentNode] = []
         if backtrack_type != "simple":
-            for node , colors in inf[1].items():
+            for node, colors in inf[1].items():
                 for c in colors:
                     domains[node].append(c)
             
@@ -646,27 +660,64 @@ def mac(nodeID, color):
     (MAC) inference for Recursive Backtracking.  
     Returns false if some domain is reduced to empty set, else true.
     '''
+    altered = defaultdict(list) 
+    #local var to track changed nodes, maps node ID to list of colors removed from that 
+    #node's domain so we can replace them later if we backtrack
+    
     # Initialize Queue of arcs to check
+    arcQueue = deque()
+    for i in range(len(graph)):
+        if adjacent_matrix[nodeID][i] == 1 and not colorNode[i]:
+            arcQueue.append((i, nodeID))
     
     # Loop until Queue is empty
-    
-        # call revise function, if true
-            # check for empty domains, if found return false
-            # add arcs to queue
+    while arcQueue:
+        arc = arcQueue.popleft()
+        # Run revise method, which returns a tuple of a boolean along with the altered dictionary for undoing changes
+        revised = revise(arc)
+        if revised[0]:
+            # populate altered dictionary for reversing domain changes later
+            for n, c in revised[1].items():
+                for col in c:
+                    altered[n].append(col)
+            # check for empty domain, if found return false
+            if not domains[arc[0]]:
+                return (False, altered)
             
-    return True
+            # add arcs to queue that are neighbors of arc[0], unassigned, and not nodeID
+            for i in range(len(graph)):
+                if adjacent_matrix[arc[0]][i] == 1 and not colorNode[i] and i != nodeID:
+                    arcQueue.append((i, arc[0]))
+                    
+    return (True, altered)
 
 
-def revise(node1, node2):
+def revise(arc):
     ''' Used by mac() (AC-3) to revise domains of nodes to enforce arc consistency.
-    Checks domain of node 2 for colors that can be consistent with each color in node 1's
-    domain, if not that color is removed from node 1's domain.
-    Returns true if domain is revised, else false. 
+    Checks domain of arc[0] for colors that can be consistent with each color in arc[1]'s
+    domain, if not that color is removed from arc[0]'s domain.
+    Returns a tuple: (bool, altered) where bool is true if domain is revised, else false. 
     '''
-    # iterate domain of node 1, c
-        # if no color in domain of node 2 is consistent with c, remove c from domain 1, revised = true
+    altered = defaultdict(list) 
+    #local var to track changed nodes, maps node ID to list of colors removed from that 
+    #node's domain so we can replace them later if we backtrack
+    revised = False
+    
+    # iterate domain of arc[0]
+    for x in domains[arc[0]]:
+        satisfied = False
+        # iterate domain of arc[1]
+        for y in domains[arc[1]]:
+            if x != y:
+                satisfied = True
+                
+        if not satisfied:
+            domains[arc[0]].remove(x)
+            altered[arc[0]].append(x)
+            revised = True
+            
         
-    return True
+    return (revised, altered)
 
 
 def select_mrv():
@@ -942,11 +993,11 @@ def run_experiment_genetic_algorithm(num_colors):
        
 def main():
     #run_experiment_simple_backtracking(3)
-    run_experiment_simple_backtracking(4)
+    #run_experiment_simple_backtracking(4)
     #run_experiment_backtracking_forward_checking(3)
     #run_experiment_backtracking_forward_checking(4)
     #run_experiment_backtracking_MAC(3)
-    #run_experiment_backtracking_MAC(4)
+    run_experiment_backtracking_MAC(4)
     #run_experiment_min_conflicts(3)
     #run_experiment_min_conflicts(4)
     #run_experiment_genetic_algorithm(3)
