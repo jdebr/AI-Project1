@@ -10,9 +10,11 @@ Project 1
 
 import random
 import math
-from collections import defaultdict
+from collections import defaultdict, deque
 import matplotlib.pyplot as py
 import copy
+import datetime
+import operator
 
 
 
@@ -25,6 +27,15 @@ graph = defaultdict(list)
 colorNode = defaultdict(list)
 # Maps node ID to some color value
 # {nodeID: 'color'}
+
+
+color = {}
+# Maps node ID to some color value
+# {nodeID: 'color'}
+
+
+conflicts = {}
+#List of the number of conflic for each vertex 
 
 
 colorNodeChecker = defaultdict(list)
@@ -56,6 +67,27 @@ domains = defaultdict(list)
 # {nodeID: [color1, color2, ...]}
 
 
+OP_COUNT = 0
+# Counter to track number of times a node is assigned a color within an algorithm
+
+
+#Population array containing chromosome number as cell value
+population = defaultdict(list)
+
+#chromosome containing node as index value and color as cell value. It can be a dictionary too.
+chromosome = []
+
+#Store the value of 2 random selected chromosome aka parent.
+tempParent = defaultdict(list)
+
+#Actual Parents which store fit chromosome
+parent1 = []
+parent2 = []
+
+#fitness Dictionary
+fitness = {}
+
+
 def generate_points(n):
     ''' Generates n sets of points randomly scattered on the 
     unit square and stores them as tuples mapped to integer IDs
@@ -63,8 +95,8 @@ def generate_points(n):
     coords.clear()
     
     for i in range(n):
-        randX = random.randint(1, 10000)
-        randY = random.randint(1, 10000)
+        randX = random.randint(1, 1000000)
+        randY = random.randint(1, 1000000)
         v = (float(randX), float(randY))
         coords[i] = v 
         
@@ -226,116 +258,383 @@ def matrix_creation():
             else:
                 adjacent_matrix[random_point].append(1)
         available_nodes_coloring.remove(random_point)   
+        
+        
+# START MIN CONFLICTS IMPORT
+def creat_adgacent_matrix():   
+    #init adjacent matrix
+    matrix_adj = list()
+    for x in range(0, len(graph)):
+        raw = list()
+        for y in range(0,len(graph)):
+            raw.append(0)
+        matrix_adj.append(raw)
+    #Creat matrix
+    for i in range(0,len(graph)) :
+        for j in range(0, len(graph)):
+            if j in graph[i] : 
+                matrix_adj[i][j] = 1
+                matrix_adj[j][i] = 1
+    return matrix_adj
+ 
+def random_color(nb):
+    return random.randint(0, nb-1)
     
+def init_graph_color(nb):
+    for v in graph : 
+        color[v] = random_color(nb)
 
-def BackTracking(numberOfColors):
-    ''' Simple Backtracking Algorithm Start '''
+#compute the number of conflicts for a vertex v and save it in the list conflicts
+def nb_conflicts(v, mat_adj) : 
+    nb = 0
+    for pts in range(len(graph)):
+        if mat_adj[v][pts] == 1 and color[v] == color[pts] : 
+            nb= nb + 1
+    conflicts[v] = nb
+    
+def tot_conflicts(mat_adj):
+    for v in graph :
+        nb_conflicts(v,mat_adj)
+    return sum(conflicts.itervalues())
+
+    
+def test_csp(mat_adj): 
+    if tot_conflicts(mat_adj) == 0 :
+        return True
+    else :
+        return False
+
+def minimize_conflicts(mat_adj, nb):
+    print("premiere matrix de col / initial color matrix")
+    print(color)
+    nb_tot_conf = tot_conflicts(mat_adj)
+    list_conf = conflicts
+    max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+    print("conflicts " + str(conflicts))
+    print("max_conf " + str(max_conf))
+    col_max = color[max_conf]
+    new_col = random_color(nb)
+    while col_max == new_col :
+        new_col = random_color(nb)
+    color[max_conf] = new_col
+    print("deuxieme matrix de col / new color matrix")
+    print(color)
+    new_nb_tot_conf = tot_conflicts(mat_adj)
+    print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
+    while new_nb_tot_conf >= nb_tot_conf : # or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:  
+        list_conf[max_conf] = 0
+        max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+        print("*******************************************************")
+        print("max_conf node # " + str(max_conf))
+        print("color" + str(color))
+        print("color of node " + str(max_conf) + ": " + str(color[max_conf]))
+        col_max = color[max_conf]
+        new_col = random_color(nb)
+        while col_max == new_col :
+            new_col = random_color(nb)
+        color[max_conf] = new_col
+        new_nb_tot_conf = tot_conflicts(mat_adj)
+        print("Old # conflicts: " + str(nb_tot_conf))
+        print("New # conflicts: " + str(new_nb_tot_conf))
+        
+    
+def min_conflicts(max_it,nb) : 
+    mat_adj = creat_adgacent_matrix()
+    init_graph_color(nb)
+    for i in range(1, max_it) :
+        if test_csp(mat_adj):
+            print("Vrai")
+            return True
+        minimize_conflicts(mat_adj, nb)
+        
+    print("Failure")
+    return False
+
+# END MIN CONFLICTS IMPORT
+    
+#Start of Non Recursive Simple Back Tracking 
+def NonRecursiveSimpleBackTracking(numberOfColors):
+    #This needs to be asked during graph point generation
+    #numberOfColors = 4
+    
     for i in range(numberOfColors):
         listOfColor.append(i)
-        
     numberOfVertices = len(adjacent_matrix)
     tempColorList = copy.deepcopy(listOfColor)
     nodeNumber = 0
-    #print("Temp Color List " + str(tempColorList))
+    
+    print("Temp  Color List 1 " + str(tempColorList))
     while nodeNumber < len(adjacent_matrix):
-        #print("Node selected " + str(nodeNumber))
+        print("Node selected " + str(nodeNumber))
+        
+        if nodeNumber == 0 and not tempColorList:
+            print("Game Over!!")
+            break
+                 
         for colors in range(len(listOfColor)):
             randomColor = tempColorList[random.randrange(len(tempColorList))]
-            #print("Color selected is " + str(randomColor))
+            
+            print("Color selected for assigning is " + str(randomColor))
+            
             if checkAndAssignColor(nodeNumber, numberOfVertices, randomColor):
                 colorNode[nodeNumber].append(randomColor)
-                #print("Temp Color List 2 " + str(tempColorList))
-                #print("Test this " + str(colorNode.items()))
+                print("Testing of Main ColorNode " + str(colorNode.items()))
                 tempColorList = copy.deepcopy(listOfColor)
-                #print("Temp Color List 3 " + str(tempColorList))
+                print("Temp Color List re-copy in case half empty and if not still, if all is well " + str(tempColorList))
                 nodeNumber = nodeNumber + 1
                 break
-
+            
+            #Brain of Back track
             else:
                 tempColorList.remove(randomColor)
-                #print("Temp Color List 4 " + str(tempColorList))                
+                print("Temp Color List in the first else block after removing color " + str(tempColorList))
+                
                 if colors + 1 == len(listOfColor) or not tempColorList:
-                    #print("Back Track")
-                    nodeNumber = nodeNumber - 1                   
-                    colorToDelete = colorNode.__getitem__(nodeNumber)
-                    #print("Current Node Working " + str(nodeNumber))
                     
-                    colorToDelete = str(colorToDelete).replace('[', '').replace(']', '')
+
+                    print("Back Track Enter")
                     
-                    colorInt = int(colorToDelete)
-                    #print(colorInt)
+                    nodeNumber = nodeNumber - 1
                     
+                    #To get the color Number of previous Node                   
+                    colorToDelete = removeBracketsMakeInt(colorNode.__getitem__(nodeNumber))
+                    print("Current Node Working and Popping from main " + str(nodeNumber))
+                    #Converting to int for popping and Removing the brackets from color number
+                    print("Color to delete is " + str(colorToDelete))
                     colorNode.pop(nodeNumber)
-                    if colorInt not in colorNodeChecker[nodeNumber]:
-                        colorNodeChecker[nodeNumber].append(colorInt)
-                        #print("Color Node checker " + str(colorNodeChecker.items()))
-                        for key, values in colorNodeChecker.items():
-                            tempColorList = copy.deepcopy(listOfColor)
-                            for values in colorNodeChecker[nodeNumber]:
-                                #print("Temp Color List 5 " + str(tempColorList))
-                                #print(values)
-                                tempColorList.remove(values)
+                    print("Main color node after popping " + str(colorNode.items()))
+                    
+                    if colorToDelete not in colorNodeChecker[nodeNumber] or nodeNumber not in colorNodeChecker:                       
+                        colorNodeChecker[nodeNumber].append(colorToDelete)
+                        print("Color Node checker after appending and in if block " + str(colorNodeChecker.items()))
+                        tempColorList = copy.deepcopy(listOfColor)
+                        for values in colorNodeChecker[nodeNumber]:
+                            print("Temp Color List before popping " + str(tempColorList))
+                            print("Color values " + str(values))
+                            tempColorList.remove(values)
+                            
                     else:
-                        #print("Color Node checker " + str(colorNodeChecker.items()))
-                        for key, values in colorNodeChecker.items():
-                            tempColorList = copy.deepcopy(listOfColor)
-                            for values in colorNodeChecker[nodeNumber]:
-                                #print("Temp Color List 6 " + str(tempColorList))
-                                #print(values)
-                                tempColorList.remove(values)
-                                            
-                    #print("<><><><><><><>" + str(tempColorList))
-                    #print("Node" + str(nodeNumber))
+                        print("Color Node checker in else block" + str(colorNodeChecker.items()))
+                        tempColorList = copy.deepcopy(listOfColor)
+                        for values in colorNodeChecker[nodeNumber]:
+                            print("Temp Color List in else before popping " + str(tempColorList))
+                            print(values)
+                            tempColorList.remove(values)
+                            
+                            
+                    if not tempColorList and len(colorNodeChecker[nodeNumber]) == numberOfColors:
+                        print("Special case start")
+                        colorNodeChecker.pop(nodeNumber) 
+                        nodeNumber = nodeNumber - 1                       
+                        tempColorList = copy.deepcopy(listOfColor)
+                        specialColorToDelete = removeBracketsMakeInt(colorNode.__getitem__(nodeNumber))
+                        print("Current Node Working and Popping " + str(nodeNumber))
+                        #Converting to int for popping and Removing the brackets from color number
+                        print("Color to delete is " + str(specialColorToDelete))
+                        colorNode.pop(nodeNumber)
+                        tempColorList.remove(specialColorToDelete)
+                        if specialColorToDelete not in colorNodeChecker[nodeNumber] or nodeNumber not in colorNodeChecker:                       
+                            colorNodeChecker[nodeNumber].append(specialColorToDelete)
+                        print("Main color node after popping " + str(colorNode.items()))
+                        print("Special case end")
+                                           
+                    print("<><><><><><><> after popping " + str(tempColorList))
+                    print("Node before exiting" + str(nodeNumber))
                     break
-                               
+                
+                elif nodeNumber == 0 and not tempColorList:
+                    print("No more Possible Solutions")
+                    break
+                    
+            
+    print ("Final List ending backtrack " + str(colorNode.items()))  
+#End of Non-Recursive Simple Back Tracking 
+
+#Start of Recursive Simple Back Tracking
+
+def RecursiveSimpleBackTracking(numberOfColors,nodeNumber):
+    if not (brainBackTracking(numberOfColors,nodeNumber)):
+        print("Sorry No Solution")
+        return False
+    
+    print(colorNode)
+    return True
+        
+    
+    
+def brainBackTracking(numberOfColors, nodeNumber):
+    for i in range(numberOfColors):
+        if nodeNumber == len(adjacent_matrix):
+            return True
+        if(checkAndAssignColor(nodeNumber, len(adjacent_matrix), i)):
+            colorNode[nodeNumber].append(i)
+            
+            if brainBackTracking(numberOfColors, nodeNumber + 1):
+                return True
+                            
+            colorNode.pop(nodeNumber)
+            
+    return False
+
+    print("final Colors")
+    print(colorNode)
    
 def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
-    ''' For node ID nodeNumber and the number of vertices in the graph totalVertices,
-    returns TRUE if no adjacent vertices already have the color represented by colorNumber,
-    and FALSE otherwise
-    '''
     for i in range(totalVertices):
+      
         if adjacent_matrix[nodeNumber][i] == 1:
             if colorNumber in colorNode[i]:
                 return False
         
-    return True 
-'''
-        OldMethod
-        if adjacent_matrix[nodeNumber][i] == 1:
-            if not colorList:
-                return True
-            else:
-                lengthOfColorArray = len(colorList)
-                print(lengthOfColorArray)
-                if i >= lengthOfColorArray:
-                    pass
-                else:
-                    if colorNumber == colorList[i]:
-                        return False
-                        '''    
+    return True
+    
+#End of Recursive Simple Back Tracking    
+    
+#Start of Genetic Algorithm
 
-
-def modified_backtracking(numColors):
-    ''' Initial call for recursive backtracking algorithm
-    Returns True if coloring is successful,
-    else returns False
+def populationCreation(totalColor, noOfChromosome):
+    
+    
+    for i in range(totalColor):
+        listOfColor.append(i)
+        
+    for key in range(noOfChromosome):
+        if not chromosome:
+            for i in range(len(coords.items())):
+                chromosome.append(random.randrange(len(listOfColor))) 
+        
+        else:
+            chromosome[:] = []
+            for i in range(len(coords.items())):
+                chromosome.append(random.randrange(len(listOfColor)))
+                
+        #print("Chromosome is ")
+        #print(chromosome)
+        for i in range(len(chromosome)):
+            population[key].append(chromosome[i])
+        
+     
+    print("Final Population is ")
+    print(population)
+    parentSelection(noOfChromosome)           
+        
+def parentSelection(noOfChromosome):
     '''
+    We select two random temporary parents  from the chromosome and find the fitness and discard the unfit
+    and this process is repeated again for the selection of parent 2.
+    '''
+
+    tempPopulation = copy.deepcopy(population)
+    for i in range(2):
+        tempParent[i].append(random.randrange(len(tempPopulation)))
+        print(tempParent[i])
+        keyDeletion = removeBracketsMakeInt(tempParent[i])
+        tempPopulation.pop(keyDeletion)
+        
+    print("Temporary Parent List " + str(tempParent))
+    print("Temp Population " + str(tempPopulation))
+    '''
+    We need to calculate fitness of the selected parents and pop the fit one from the main population
+    '''
+    calculateFitness(noOfChromosome)
+
+    
+def calculateFitness(noOfChromosome):
+    
+    sum = 0
+    for key, value in tempParent.items():
+        for graphKey, graphValue in graph.items():
+            for i in range(len(graph[graphKey])):
+                #since i need to go to particular value of population converting to int and removing braces. 
+                tempParentValue = removeBracketsMakeInt(tempParent[key])
+                if population[tempParentValue][graphKey] == population[tempParentValue][graph[graphKey][i]]:
+                    sum = sum + 1
+        print("Sum is " + str(sum))
+        fitness[key] = sum
+        #for second loop sum is zero
+        sum = 0
+
+    
+    print(tempParent[1])
+
+    print("Fitness of parents " + str(fitness))
+    if  fitness[0] > fitness[1]:
+        tempParentValue = removeBracketsMakeInt(tempParent[1])
+        if not parent1:
+            parent1.append(population[tempParentValue])
+        else:
+            parent2.append(population[tempParentValue])
+    else:
+        tempParentValue = removeBracketsMakeInt(tempParent[0]) 
+        if not parent1:
+            parent1.append(population[tempParentValue])
+        else:
+            parent2.append(population[tempParentValue])
+            
+            
+    '''
+    Since we need to fill both parents so i call the parent function once more sing this
+    '''
+                    
+    if not parent1 or not parent2:
+        tempParent.clear()
+        fitness.clear()
+        print("*****************************")
+        print(fitness)
+        print("*****************************")
+        parentSelection(noOfChromosome)
+    else:
+        
+        print("Final Parent 1 is " + str(parent1))
+        print("Final Parent 2 is " + str(parent2))  
+        SplitParents()
+
+def SplitParents():
+    newParents = []
+    nodeNumber = 0
+    for i in parent1:
+        for val in i:
+            if nodeNumber < (int((len(graph.items()))/2)):
+                newParents.append(val)
+                nodeNumber = nodeNumber + 1
+    for i in parent2:
+        for subval in i[nodeNumber:]:
+            newParents.append(subval)
+        
+    print("New Parents " + str(newParents))
+
+def removeBracketsMakeInt(toCovertValue):
+        tempValue = toCovertValue
+        tempValue = str(tempValue).replace('[', '').replace(']', '')                    
+        tempValueInt = int(tempValue)
+        return tempValueInt
+
+#End of Genetic Algorithm
+    
+
+def modified_backtracking(numColors, backtrack_type = "simple"):
+    ''' Initial call for recursive backtracking algorithm, takes number of colors we are 
+    using and type ("simple," "forward", "mac") as parameters.
+    Returns True if coloring is successful, else returns False
+    '''
+    # INITIALIZATION OF GLOBALS
+    # Clear color nodes
     colorNode.clear()
     # Initialize colorNode dictionary for coloring_complete() method
     for i in range(len(graph)):
         colorNode[i] = []
-        
+    # Initialize domain values
     initialize_domains(numColors)
     
     # Begin recursion
-    return recursive_backtracking(numColors)    
+    return recursive_backtracking(numColors, backtrack_type)    
 
 
-def recursive_backtracking(numColors):
+def recursive_backtracking(numColors, backtrack_type):
     ''' The recursive backtracking algorithm from Russell & Norvig pg 219.
-    Returns True if coloring is successful,
-    else returns False
+    Takes number of colors and type of backtrack algorithm as parameters.
+    Called automatically by modified_backtracking() and itself.
+    Returns True if coloring is successful, else returns False
     '''
     # Base Case
     if coloring_complete():
@@ -343,19 +642,142 @@ def recursive_backtracking(numColors):
         return True
     # Select Unassigned Variable, use MRV heuristic?
     currentNode = select_mrv()
+    # Local variable for iterating through domains
+    currentDomain = copy.deepcopy(domains[currentNode])
+    # Local variable for inference results
+    inf = (True, [])
     # Iterate through colors available for currentNode
-    for color in domains[currentNode]:
+    for color in currentDomain:
         if checkAndAssignColor(currentNode, len(graph), color):
+            # Color the node 
             colorNode[currentNode].append(color)
-            # INFERENCE STEP HERE
-            # Recursive call
-            result = recursive_backtracking(numColors)
-            if result:
-                return result
-        # We backtracked if we reach here so remove that color assignment
-        colorNode[currentNode] = []    
+            # reduce the domain of that node to that color temporarily for MAC
+            restoreColors = []
+            for c in domains[currentNode]:
+                if c != color:
+                    restoreColors.append(c) 
+            for c in restoreColors:
+                domains[currentNode].remove(c)   
+            # Track number of node colorings
+            incr_op_count()
+            # INFERENCE STEP HERE - inf will contain boolean representing inference success
+            # and a dict of lists of altered node domains in case changes need to be reverted
+            if backtrack_type == "forward":
+                inf = forward_check(currentNode, color)
+            elif backtrack_type == "mac":
+                inf = mac(currentNode, color)
+            # If inferences do not result in a failed coloring
+            if inf[0]:
+                # Recursive call
+                result = recursive_backtracking(numColors, backtrack_type)
+                if result:
+                    return result
+            # Restore domain of current node
+            for c in restoreColors:
+                domains[currentNode].append(c)
+        # We backtracked if we reach here so remove that color assignment and undo inference changes
+        colorNode[currentNode] = []
+        if backtrack_type != "simple":
+            for node, colors in inf[1].items():
+                for c in colors:
+                    domains[node].append(c)
+            
         
     return False
+
+
+def forward_check(nodeID, color):
+    ''' Removes a recently assigned color from the domains of all unassigned
+    adjacent nodes.  Returns a tuple containing a boolean and a list of nodeIDs
+    for altered domains, where the boolean is false if some domain is empty and 
+    true otherwise.
+    '''
+    altered = defaultdict(list) 
+    #local var to track changed nodes, maps node ID to list of colors removed from that 
+    #node's domain
+    
+    # Check all nodes for adjacency to current node and no color assignment
+    for i in range(len(graph)):
+        if adjacent_matrix[nodeID][i] == 1 and not colorNode[i]:
+            # Remove from those nodes' domains the current color value
+            if color in domains[i]:
+                domains[i].remove(color)
+                altered[i].append(color)
+                
+    # Check for empty domains
+    for i in range(len(graph)):
+        if not domains[i]:
+            # If any domain is empty, return false
+            return (False, altered)
+        
+    # Otherwise keep domain changes and return true
+    return (True, altered)
+
+
+def mac(nodeID, color):
+    ''' An implementation of AC-3 for Arc Consistency from Russell & Norvig, pg 209.
+    Used by inference step of recursive backtracking for the Maintaining Arc Consistency
+    (MAC) inference for Recursive Backtracking.  
+    Returns false if some domain is reduced to empty set, else true.
+    '''
+    altered = defaultdict(list) 
+    #local var to track changed nodes, maps node ID to list of colors removed from that 
+    #node's domain so we can replace them later if we backtrack
+    
+    # Initialize Queue of arcs to check
+    arcQueue = deque()
+    for i in range(len(graph)):
+        if adjacent_matrix[nodeID][i] == 1 and not colorNode[i]:
+            arcQueue.append((i, nodeID))
+    
+    # Loop until Queue is empty
+    while arcQueue:
+        arc = arcQueue.popleft()
+        # Run revise method, which returns a tuple of a boolean along with the altered dictionary for undoing changes
+        revised = revise(arc)
+        if revised[0]:
+            # populate altered dictionary for reversing domain changes later
+            for n, c in revised[1].items():
+                for col in c:
+                    altered[n].append(col)
+            # check for empty domain, if found return false
+            if not domains[arc[0]]:
+                return (False, altered)
+            
+            # add arcs to queue that are neighbors of arc[0], unassigned, and not nodeID
+            for i in range(len(graph)):
+                if adjacent_matrix[arc[0]][i] == 1 and not colorNode[i] and i != nodeID:
+                    arcQueue.append((i, arc[0]))
+                    
+    return (True, altered)
+
+
+def revise(arc):
+    ''' Used by mac() (AC-3) to revise domains of nodes to enforce arc consistency.
+    Checks domain of arc[0] for colors that can be consistent with each color in arc[1]'s
+    domain, if not that color is removed from arc[0]'s domain.
+    Returns a tuple: (bool, altered) where bool is true if domain is revised, else false. 
+    '''
+    altered = defaultdict(list) 
+    #local var to track changed nodes, maps node ID to list of colors removed from that 
+    #node's domain so we can replace them later if we backtrack
+    revised = False
+    
+    # iterate domain of arc[0]
+    for x in domains[arc[0]]:
+        satisfied = False
+        # iterate domain of arc[1]
+        for y in domains[arc[1]]:
+            if x != y:
+                satisfied = True
+                
+        if not satisfied:
+            domains[arc[0]].remove(x)
+            altered[arc[0]].append(x)
+            revised = True
+            
+        
+    return (revised, altered)
 
 
 def select_mrv():
@@ -415,8 +837,18 @@ def plot_graph():
     py.show()
     
     
+def get_time():
+    return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+
+def incr_op_count():
+    global OP_COUNT
+    OP_COUNT = OP_COUNT + 1
+    
+    
 def unit_tests():
     tests_passed = True
+    global OP_COUNT
     
     # Graph creation test
     '''
@@ -437,55 +869,200 @@ def unit_tests():
     for node1, v in graph.items():
         for node2 in v:
             if colorNode[node1] == colorNode[node2]:
-                print("Adjacent nodes have same color!")
-                print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
+                #print("Adjacent nodes have same color!")
+                #print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
                 tests_passed = False
                 
     if tests_passed:
         print("Unit tests successfully passed!")
+        print("Total Operations: ")
+        print(OP_COUNT)
+    else:
+        print("Unit tests failed!")
+        print("Total Operations: ")
+        print(OP_COUNT)
+        
+    OP_COUNT = 0
+    
+    
+def min_conflict_unit_test():
+    tests_passed = True
+    # Successful coloring test
+    for node1, v in graph.items():
+        for node2 in v:
+            if color[node1] == color[node2]:
+                print("Adjacent nodes have same color!")
+                print("Node " + str(node1) + ": " + str(color[node1]) + ", Node " + str(node2)) + ": " + str(color[node2])
+                tests_passed = False
+                
+    if tests_passed:
+        print("Unit tests successfully passed!")
+        #print("Total Operations: ")
+        #print(OP_COUNT)
+    else:
+        print("Unit tests failed!")
+        #print("Total Operations: ")
+        #print(OP_COUNT)
+        
+    OP_COUNT = 0
+    
             
-            
-def run_experiment():
-    # Scatter Points
-    generate_points(10)
-    #print("Coordinates:")
-    #print(coords.items())
-    
-    # Determine Euclidean Distances
-    calculate_distances()    
-    #print("Euclidean Distances")
-    #print(distance.items())
-    
-    # Connect Edges
-    build_graph()
-    print("Graph:")
-    print(graph.items())
-    
-    # Show Visual Plot
-    #plot_graph()
-    
-    # Create Adjacency Matrix
-    matrix_creation()
-    #print("Adj Matrix:")
-    #print(adjacent_matrix.items())
-    
-    # Run Simple Backtracking
-    #print("Running Simple Backtracking")
-    #BackTracking(4)
-       
-    
-    # Run Backtracking w/ Forward Checking
-    print("Running Backtracking w/ Forward Checking")
-    print(modified_backtracking(4)) 
-    
-    print("Color Assignments:")
-    print(colorNode.items())  
+def run_experiment_simple_backtracking(num_colors):
+    for i in range(1, 11):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Simple Backtracking
+        print("##############################################################")
+        print("Running Simple Backtracking  - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        print(modified_backtracking(num_colors, "simple")) 
+        print(get_time())
+        
+        unit_tests()
+        
+        
+def run_experiment_backtracking_forward_checking(num_colors):
+    for i in range(1, 11):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Backtracking w/ FC
+        print("##############################################################")
+        print("Running Backtracking w/ Forward Checking - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        print(modified_backtracking(num_colors, "forward")) 
+        print(get_time())
+        
+        unit_tests()
+        
+        
+def run_experiment_backtracking_MAC(num_colors):
+    for i in range(1, 11):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Backtracking w/ MAC
+        print("##############################################################")
+        print("Running Backtracking w/ MAC - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        print(modified_backtracking(num_colors, "mac")) 
+        print(get_time())
+        
+        unit_tests()
+        
+        
+def run_experiment_min_conflicts(num_colors):
+    for i in range(1, 2):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Min Conflicts
+        print("##############################################################")
+        print("Running Min Conflicts - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        min_conflicts(100, num_colors)
+        print(get_time())
+        
+        min_conflict_unit_test()
+        
+        
+def run_experiment_genetic_algorithm(num_colors):
+    for i in range(1, 2):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run GA
+        print("##############################################################")
+        print("Running GA - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        populationCreation(num_colors, 20)
+        print(get_time())
+        
        
        
 def main():
-    run_experiment()
-    unit_tests()
-    
+    #run_experiment_simple_backtracking(3)
+    #run_experiment_simple_backtracking(4)
+    #run_experiment_backtracking_forward_checking(3)
+    #run_experiment_backtracking_forward_checking(4)
+    #run_experiment_backtracking_MAC(3)
+    run_experiment_backtracking_MAC(4)
+    #run_experiment_min_conflicts(3)
+    #run_experiment_min_conflicts(4)
+    #run_experiment_genetic_algorithm(3)
+    #run_experiment_genetic_algorithm(4)
+    pass
     
 if __name__ == '__main__':
     main()
