@@ -14,6 +14,7 @@ from collections import defaultdict
 import matplotlib.pyplot as py
 import copy
 import datetime
+import operator
 
 
 
@@ -278,7 +279,7 @@ def init_graph_color(nb):
 def nb_conflicts(v, mat_adj) : 
     nb = 0
     for pts in mat_adj[v]:
-        if color[v] == color[pts] : 
+        if mat_adj[v][pts] == 1 and color[v] == color[pts] : 
             nb= nb + 1
     conflicts[v] = nb
 
@@ -296,28 +297,28 @@ def test_csp(mat_adj):
         return False
 
 def minimize_conflicts(mat_adj, nb):
-    print("premiere matrix de col")
+    print("premiere matrix de col / initial color matrix")
     print(color)
     nb_tot_conf = tot_conflicts(mat_adj)
     list_conf = conflicts
     max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
-    print "conflicts " + str(conflicts)
-    print "max_conf " + str(max_conf)
+    print("conflicts " + str(conflicts))
+    print("max_conf " + str(max_conf))
     col_max = color[max_conf]
     new_col = random_color(nb)
     while col_max == new_col :
         new_col = random_color(nb)
     color[max_conf] = new_col
-    print "deuxieme matrix de col"
-    print color
+    print("deuxieme matrix de col / new color matrix")
+    print(color)
     new_nb_tot_conf = tot_conflicts(mat_adj)
-    print "nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf)
-    while new_nb_tot_conf >= nb_tot_conf and conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:
+    print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
+    while new_nb_tot_conf >= nb_tot_conf : # or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:
         list_conf[max_conf] = 0
         max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
-        print "max_conf " + str(max_conf)
-        print "color" + str(color)
-        print color[max_conf]
+        print("max_conf " + str(max_conf))
+        print("color" + str(color))
+        print(color[max_conf])
         col_max = color[max_conf]
         new_col = random_color(nb)
         while col_max == new_col :
@@ -331,9 +332,9 @@ def min_conflicts(max_it,nb) :
     for i in range(1, max_it) :
         minimize_conflicts(mat_adj, nb)
         if test_csp(mat_adj):
-            print "Vrai"
+            print("Vrai")
             return True
-    print "Failure"
+    print("Failure")
     return False
 
 # END MIN CONFLICTS IMPORT
@@ -749,6 +750,27 @@ def unit_tests():
         
     OP_COUNT = 0
     
+    
+def min_conflict_unit_test():
+    # Successful coloring test
+    for node1, v in graph.items():
+        for node2 in v:
+            if color[node1] == color[node2]:
+                #print("Adjacent nodes have same color!")
+                #print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
+                tests_passed = False
+                
+    if tests_passed:
+        print("Unit tests successfully passed!")
+        #print("Total Operations: ")
+        #print(OP_COUNT)
+    else:
+        print("Unit tests failed!")
+        #print("Total Operations: ")
+        #print(OP_COUNT)
+        
+    OP_COUNT = 0
+    
             
 def run_experiment_simple_backtracking(num_colors):
     for i in range(1, 11):
@@ -838,7 +860,7 @@ def run_experiment_backtracking_MAC(num_colors):
         
         
 def run_experiment_min_conflicts(num_colors):
-    for i in range(1, 11):
+    for i in range(1, 2):
         num_points = i * 10
         # Scatter Points
         generate_points(num_points)
@@ -860,19 +882,21 @@ def run_experiment_min_conflicts(num_colors):
         print("Running Min Conflicts - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
         print(get_time())
-        min_conflicts(1000, num_colors)
+        min_conflicts(100, num_colors)
         print(get_time())
         
-        unit_tests()
+        min_conflict_unit_test()
        
        
 def main():
     #run_experiment_simple_backtracking(3)
     #run_experiment_simple_backtracking(4)
-    run_experiment_backtracking_forward_checking(3)
+    #run_experiment_backtracking_forward_checking(3)
     #run_experiment_backtracking_forward_checking(4)
     #run_experiment_backtracking_MAC(3)
     #run_experiment_backtracking_MAC(4)
+    #run_experiment_min_conflicts(3)
+    run_experiment_min_conflicts(4)
     pass
     
 if __name__ == '__main__':
