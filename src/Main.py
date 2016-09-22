@@ -352,7 +352,7 @@ def min_conflicts(max_it,nb) :
 
 # END MIN CONFLICTS IMPORT
     
-
+#Start of Non Recursive Simple Back Tracking 
 def NonRecursiveSimpleBackTracking(numberOfColors):
     #This needs to be asked during graph point generation
     #numberOfColors = 4
@@ -448,7 +448,9 @@ def NonRecursiveSimpleBackTracking(numberOfColors):
                     
             
     print ("Final List ending backtrack " + str(colorNode.items()))  
+#End of Non-Recursive Simple Back Tracking 
 
+#Start of Recursive Simple Back Tracking
 
 def RecursiveSimpleBackTracking(numberOfColors,nodeNumber):
     if not (brainBackTracking(numberOfColors,nodeNumber)):
@@ -485,7 +487,10 @@ def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
                 return False
         
     return True
-
+    
+#End of Recursive Simple Back Tracking    
+    
+#Start of Genetic Algorithm
 
 def populationCreation(totalColor, noOfChromosome):
     
@@ -579,15 +584,32 @@ def calculateFitness(noOfChromosome):
         print("*****************************")
         parentSelection(noOfChromosome)
     else:
+        
         print("Final Parent 1 is " + str(parent1))
-        print("Final Parent 2 is " + str(parent2))
+        print("Final Parent 2 is " + str(parent2))  
+        SplitParents()
 
-#Helper Function to remove brackets and make it to int
+def SplitParents():
+    newParents = []
+    nodeNumber = 0
+    for i in parent1:
+        for val in i:
+            if nodeNumber < (int((len(graph.items()))/2)):
+                newParents.append(val)
+                nodeNumber = nodeNumber + 1
+    for i in parent2:
+        for subval in i[nodeNumber:]:
+            newParents.append(subval)
+        
+    print("New Parents " + str(newParents))
+
 def removeBracketsMakeInt(toCovertValue):
         tempValue = toCovertValue
         tempValue = str(tempValue).replace('[', '').replace(']', '')                    
         tempValueInt = int(tempValue)
-        return tempValueInt  
+        return tempValueInt
+
+#End of Genetic Algorithm
     
 
 def modified_backtracking(numColors, backtrack_type = "simple"):
