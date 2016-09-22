@@ -280,11 +280,10 @@ def init_graph_color(nb):
 #compute the number of conflicts for a vertex v and save it in the list conflicts
 def nb_conflicts(v, mat_adj) : 
     nb = 0
-    for pts in mat_adj[v]:
+    for pts in range(len(graph)):
         if mat_adj[v][pts] == 1 and color[v] == color[pts] : 
             nb= nb + 1
     conflicts[v] = nb
-
     
 def tot_conflicts(mat_adj):
     for v in graph :
@@ -315,27 +314,32 @@ def minimize_conflicts(mat_adj, nb):
     print(color)
     new_nb_tot_conf = tot_conflicts(mat_adj)
     print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
-    while new_nb_tot_conf >= nb_tot_conf : # or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:
+    while new_nb_tot_conf >= nb_tot_conf : # or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:  
         list_conf[max_conf] = 0
         max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
-        print("max_conf " + str(max_conf))
+        print("*******************************************************")
+        print("max_conf node # " + str(max_conf))
         print("color" + str(color))
-        print(color[max_conf])
+        print("color of node " + str(max_conf) + ": " + str(color[max_conf]))
         col_max = color[max_conf]
         new_col = random_color(nb)
         while col_max == new_col :
             new_col = random_color(nb)
+        color[max_conf] = new_col
         new_nb_tot_conf = tot_conflicts(mat_adj)
+        print("Old # conflicts: " + str(nb_tot_conf))
+        print("New # conflicts: " + str(new_nb_tot_conf))
         
     
 def min_conflicts(max_it,nb) : 
     mat_adj = creat_adgacent_matrix()
     init_graph_color(nb)
     for i in range(1, max_it) :
-        minimize_conflicts(mat_adj, nb)
         if test_csp(mat_adj):
             print("Vrai")
             return True
+        minimize_conflicts(mat_adj, nb)
+        
     print("Failure")
     return False
 
@@ -767,12 +771,13 @@ def unit_tests():
     
     
 def min_conflict_unit_test():
+    tests_passed = True
     # Successful coloring test
     for node1, v in graph.items():
         for node2 in v:
             if color[node1] == color[node2]:
-                #print("Adjacent nodes have same color!")
-                #print("Node " + str(node1) + ": " + str(colorNode[node1]) + ", Node " + str(node2)) + ": " + str(colorNode[node2])
+                print("Adjacent nodes have same color!")
+                print("Node " + str(node1) + ": " + str(color[node1]) + ", Node " + str(node2)) + ": " + str(color[node2])
                 tests_passed = False
                 
     if tests_passed:
