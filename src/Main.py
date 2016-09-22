@@ -391,23 +391,21 @@ def NonRecursiveSimpleBackTracking(numberOfColors):
                 
                 if colors + 1 == len(listOfColor) or not tempColorList:
                     
-                    
+
                     print("Back Track Enter")
                     
                     nodeNumber = nodeNumber - 1
+                    
                     #To get the color Number of previous Node                   
-                    colorToDelete = colorNode.__getitem__(nodeNumber)
+                    colorToDelete = removeBracketsMakeInt(colorNode.__getitem__(nodeNumber))
                     print("Current Node Working and Popping from main " + str(nodeNumber))
                     #Converting to int for popping and Removing the brackets from color number
-                    colorToDelete = str(colorToDelete).replace('[', '').replace(']', '')                    
-                    colorInt = int(colorToDelete)
-                    print("Color to delete is " + str(colorInt))
+                    print("Color to delete is " + str(colorToDelete))
                     colorNode.pop(nodeNumber)
                     print("Main color node after popping " + str(colorNode.items()))
                     
-                    if colorInt not in colorNodeChecker[nodeNumber] or nodeNumber not in colorNodeChecker:
-                        
-                        colorNodeChecker[nodeNumber].append(colorInt)
+                    if colorToDelete not in colorNodeChecker[nodeNumber] or nodeNumber not in colorNodeChecker:                       
+                        colorNodeChecker[nodeNumber].append(colorToDelete)
                         print("Color Node checker after appending and in if block " + str(colorNodeChecker.items()))
                         tempColorList = copy.deepcopy(listOfColor)
                         for values in colorNodeChecker[nodeNumber]:
@@ -429,18 +427,14 @@ def NonRecursiveSimpleBackTracking(numberOfColors):
                         colorNodeChecker.pop(nodeNumber) 
                         nodeNumber = nodeNumber - 1                       
                         tempColorList = copy.deepcopy(listOfColor)
-                        specialColorToDelete = colorNode.__getitem__(nodeNumber)
+                        specialColorToDelete = removeBracketsMakeInt(colorNode.__getitem__(nodeNumber))
                         print("Current Node Working and Popping " + str(nodeNumber))
                         #Converting to int for popping and Removing the brackets from color number
-                        specialColorToDelete = str(specialColorToDelete).replace('[', '').replace(']', '')                    
-                        specialColorInt = int(specialColorToDelete)
-                        print("Color to delete is " + str(specialColorInt))
+                        print("Color to delete is " + str(specialColorToDelete))
                         colorNode.pop(nodeNumber)
-                        tempColorList.remove(specialColorInt)
-                        if colorInt not in colorNodeChecker[nodeNumber]:
-                            colorNodeChecker[nodeNumber].append(specialColorInt)
-                    
-                        #colorNode.pop(nodeNumber)
+                        tempColorList.remove(specialColorToDelete)
+                        if specialColorToDelete not in colorNodeChecker[nodeNumber] or nodeNumber not in colorNodeChecker:                       
+                            colorNodeChecker[nodeNumber].append(specialColorToDelete)
                         print("Main color node after popping " + str(colorNode.items()))
                         print("Special case end")
                                            
@@ -453,7 +447,7 @@ def NonRecursiveSimpleBackTracking(numberOfColors):
                     break
                     
             
-    print ("Final List ending backtrack " + str(colorNode.items()))
+    print ("Final List ending backtrack " + str(colorNode.items()))  
 
 
 def RecursiveSimpleBackTracking(numberOfColors,nodeNumber):
@@ -493,7 +487,6 @@ def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
     return True
 
 
-#Genetic Algorithm Begins
 def populationCreation(totalColor, noOfChromosome):
     
     
@@ -530,10 +523,8 @@ def parentSelection(noOfChromosome):
     for i in range(2):
         tempParent[i].append(random.randrange(len(tempPopulation)))
         print(tempParent[i])
-        keyDeletion = tempParent[i]
-        keyDeletion = str(keyDeletion).replace('[', '').replace(']', '')                    
-        keyDeletionInt = int(keyDeletion)
-        tempPopulation.pop(keyDeletionInt)
+        keyDeletion = removeBracketsMakeInt(tempParent[i])
+        tempPopulation.pop(keyDeletion)
         
     print("Temporary Parent List " + str(tempParent))
     print("Temp Population " + str(tempPopulation))
@@ -550,10 +541,8 @@ def calculateFitness(noOfChromosome):
         for graphKey, graphValue in graph.items():
             for i in range(len(graph[graphKey])):
                 #since i need to go to particular value of population converting to int and removing braces. 
-                tempParentValue = tempParent[key]
-                tempParentValue = str(tempParentValue).replace('[', '').replace(']', '')                    
-                tempParentValueInt = int(tempParentValue)
-                if population[tempParentValueInt][graphKey] == population[key][graph[graphKey][i]]:
+                tempParentValue = removeBracketsMakeInt(tempParent[key])
+                if population[tempParentValue][graphKey] == population[tempParentValue][graph[graphKey][i]]:
                     sum = sum + 1
         print("Sum is " + str(sum))
         fitness[key] = sum
@@ -561,18 +550,21 @@ def calculateFitness(noOfChromosome):
         sum = 0
 
     
+    print(tempParent[1])
 
     print("Fitness of parents " + str(fitness))
     if  fitness[0] > fitness[1]:
+        tempParentValue = removeBracketsMakeInt(tempParent[1])
         if not parent1:
-            parent1.append(population[fitness[1]])
+            parent1.append(population[tempParentValue])
         else:
-            parent2.append(population[fitness[1]])
+            parent2.append(population[tempParentValue])
     else:
+        tempParentValue = removeBracketsMakeInt(tempParent[0]) 
         if not parent1:
-            parent1.append(population[fitness[0]])
+            parent1.append(population[tempParentValue])
         else:
-            parent2.append(population[fitness[0]])
+            parent2.append(population[tempParentValue])
             
             
     '''
@@ -588,7 +580,14 @@ def calculateFitness(noOfChromosome):
         parentSelection(noOfChromosome)
     else:
         print("Final Parent 1 is " + str(parent1))
-        print("Final Parent 2 is " + str(parent2))  
+        print("Final Parent 2 is " + str(parent2))
+
+#Helper Function to remove brackets and make it to int
+def removeBracketsMakeInt(toCovertValue):
+        tempValue = toCovertValue
+        tempValue = str(tempValue).replace('[', '').replace(']', '')                    
+        tempValueInt = int(tempValue)
+        return tempValueInt  
     
 
 def modified_backtracking(numColors, backtrack_type = "simple"):
