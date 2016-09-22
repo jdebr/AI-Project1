@@ -71,12 +71,14 @@ OP_COUNT = 0
 # Counter to track number of times a node is assigned a color within an algorithm
 
 
-population = defaultdict(list)
 #Population array containing chromosome number as cell value
+population = defaultdict(list)
 
-
-chromosome = []
 #chromosome containing node as index value and color as cell value. It can be a dictionary too.
+chromosome = []
+
+#consisting a max 2 parents
+tempParent = defaultdict(list)
 
 
 def generate_points(n):
@@ -530,7 +532,20 @@ def parentSelection(noOfChromosome):
 
     
 def calculateFitness():
-    pass    
+    fitness = {}
+    sum = 0
+    for key in tempParent:
+        for graphKey, graphValue in graph.items():
+            for i in range(len(graph[graphKey])):
+                if population[key][graphKey] == population[key][graph[graphKey][i]]:
+                    sum = sum + 1
+        fitness[key] = sum
+    print("Fitness of parents " + str(fitness))
+    if  fitness[0] > fitness[1]:
+        tempParent.pop(0)
+    else:
+        tempParent.pop(1)
+    print("Final Parent is " + str(tempParent))   
     
 
 def modified_backtracking(numColors, backtrack_type = "simple"):
