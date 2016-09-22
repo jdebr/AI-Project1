@@ -28,6 +28,15 @@ colorNode = defaultdict(list)
 # {nodeID: 'color'}
 
 
+color = {}
+# Maps node ID to some color value
+# {nodeID: 'color'}
+
+
+conflicts = {}
+#List of the number of conflic for each vertex 
+
+
 colorNodeChecker = defaultdict(list)
 # Maps node ID to some color value
 # {nodeID: 'color'}
@@ -239,6 +248,95 @@ def matrix_creation():
             else:
                 adjacent_matrix[random_point].append(1)
         available_nodes_coloring.remove(random_point)   
+        
+        
+# START MIN CONFLICTS IMPORT
+def creat_adgacent_matrix():   
+    #init adjacent matrix
+    matrix_adj = list()
+    for x in range(0, len(graph)):
+        raw = list()
+        for y in range(0,len(graph)):
+            raw.append(0)
+        matrix_adj.append(raw)
+    #Creat matrix
+    for i in range(0,len(graph)) :
+        for j in range(0, len(graph)):
+            if j in graph[i] : 
+                matrix_adj[i][j] = 1
+                matrix_adj[j][i] = 1
+    return matrix_adj
+ 
+def random_color(nb):
+    return random.randint(0, nb-1)
+    
+def init_graph_color(nb):
+    for v in graph : 
+        color[v] = random_color(nb)
+
+#compute the number of conflicts for a vertex v and save it in the list conflicts
+def nb_conflicts(v, mat_adj) : 
+    nb = 0
+    for pts in mat_adj[v]:
+        if color[v] == color[pts] : 
+            nb= nb + 1
+    conflicts[v] = nb
+
+    
+def tot_conflicts(mat_adj):
+    for v in graph :
+        nb_conflicts(v,mat_adj)
+    return sum(conflicts.itervalues())
+
+    
+def test_csp(mat_adj): 
+    if tot_conflicts(mat_adj) == 0 :
+        return True
+    else :
+        return False
+
+def minimize_conflicts(mat_adj, nb):
+    print("premiere matrix de col")
+    print(color)
+    nb_tot_conf = tot_conflicts(mat_adj)
+    list_conf = conflicts
+    max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+    print "conflicts " + str(conflicts)
+    print "max_conf " + str(max_conf)
+    col_max = color[max_conf]
+    new_col = random_color(nb)
+    while col_max == new_col :
+        new_col = random_color(nb)
+    color[max_conf] = new_col
+    print "deuxieme matrix de col"
+    print color
+    new_nb_tot_conf = tot_conflicts(mat_adj)
+    print "nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf)
+    while new_nb_tot_conf >= nb_tot_conf and conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:
+        list_conf[max_conf] = 0
+        max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+        print "max_conf " + str(max_conf)
+        print "color" + str(color)
+        print color[max_conf]
+        col_max = color[max_conf]
+        new_col = random_color(nb)
+        while col_max == new_col :
+            new_col = random_color(nb)
+        new_nb_tot_conf = tot_conflicts(mat_adj)
+        
+    
+def min_conflicts(max_it,nb) : 
+    mat_adj = creat_adgacent_matrix()
+    init_graph_color(nb)
+    for i in range(1, max_it) :
+        minimize_conflicts(mat_adj, nb)
+        if test_csp(mat_adj):
+            print "Vrai"
+            return True
+    print "Failure"
+    return False
+
+# END MIN CONFLICTS IMPORT
     
 
 def NonRecursiveSimpleBackTracking(numberOfColors):
@@ -734,6 +832,35 @@ def run_experiment_backtracking_MAC(num_colors):
         #BackTracking(4)
         print(get_time())
         print(modified_backtracking(num_colors, "mac")) 
+        print(get_time())
+        
+        unit_tests()
+        
+        
+def run_experiment_min_conflicts(num_colors):
+    for i in range(1, 11):
+        num_points = i * 10
+        # Scatter Points
+        generate_points(num_points)
+        #print("Coordinates:")
+        #print(coords.items())
+        # Determine Euclidean Distances
+        calculate_distances()    
+        #print("Euclidean Distances")
+        #print(distance.items())
+        # Connect Edges
+        build_graph()
+        # Create Adjacency Matrix
+        matrix_creation()
+        #print("Adj Matrix:")
+        #print(adjacent_matrix.items())
+        
+        # Run Backtracking w/ MAC
+        print("##############################################################")
+        print("Running Min Conflicts - " + str(num_colors) + " colors, "+ str(num_points) + " points")
+        #BackTracking(4)
+        print(get_time())
+        min_conflicts(1000, num_colors)
         print(get_time())
         
         unit_tests()
