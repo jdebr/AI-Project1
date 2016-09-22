@@ -77,8 +77,15 @@ population = defaultdict(list)
 #chromosome containing node as index value and color as cell value. It can be a dictionary too.
 chromosome = []
 
-#consisting a max 2 parents
+#Store the value of 2 random selected chromosome aka parent.
 tempParent = defaultdict(list)
+
+#Actual Parents which store fit chromosome
+parent1 = []
+parent2 = []
+
+#fitness Dictionary
+fitness = {}
 
 
 def generate_points(n):
@@ -496,16 +503,17 @@ def populationCreation(totalColor, noOfChromosome):
     for key in range(noOfChromosome):
         if not chromosome:
             for i in range(len(coords.items())):
-                chromosome.append(random.randrange(len(listOfColor)))   
+                chromosome.append(random.randrange(len(listOfColor))) 
         
         else:
             chromosome[:] = []
             for i in range(len(coords.items())):
                 chromosome.append(random.randrange(len(listOfColor)))
-        print("Chromosome is ")
-        print(chromosome)
-        tempchromosome = copy.deepcopy(chromosome)
-        population[key].append(tempchromosome)
+                
+        #print("Chromosome is ")
+        #print(chromosome)
+        for i in range(len(chromosome)):
+            population[key].append(chromosome[i])
         
      
     print("Final Population is ")
@@ -532,24 +540,55 @@ def parentSelection(noOfChromosome):
     '''
     We need to calculate fitness of the selected parents and pop the fit one from the main population
     '''
-    calculateFitness()
+    calculateFitness(noOfChromosome)
 
     
-def calculateFitness():
-    fitness = {}
+def calculateFitness(noOfChromosome):
+    
     sum = 0
-    for key in tempParent:
+    for key, value in tempParent.items():
         for graphKey, graphValue in graph.items():
             for i in range(len(graph[graphKey])):
-                if population[key][graphKey] == population[key][graph[graphKey][i]]:
+                #since i need to go to particular value of population converting to int and removing braces. 
+                tempParentValue = tempParent[key]
+                tempParentValue = str(tempParentValue).replace('[', '').replace(']', '')                    
+                tempParentValueInt = int(tempParentValue)
+                if population[tempParentValueInt][graphKey] == population[key][graph[graphKey][i]]:
                     sum = sum + 1
+        print("Sum is " + str(sum))
         fitness[key] = sum
+        #for second loop sum is zero
+        sum = 0
+
+    
+
     print("Fitness of parents " + str(fitness))
     if  fitness[0] > fitness[1]:
-        tempParent.pop(0)
+        if not parent1:
+            parent1.append(population[fitness[1]])
+        else:
+            parent2.append(population[fitness[1]])
     else:
-        tempParent.pop(1)
-    print("Final Parent is " + str(tempParent))  
+        if not parent1:
+            parent1.append(population[fitness[0]])
+        else:
+            parent2.append(population[fitness[0]])
+            
+            
+    '''
+    Since we need to fill both parents so i call the parent function once more sing this
+    '''
+                    
+    if not parent1 or not parent2:
+        tempParent.clear()
+        fitness.clear()
+        print("*****************************")
+        print(fitness)
+        print("*****************************")
+        parentSelection(noOfChromosome)
+    else:
+        print("Final Parent 1 is " + str(parent1))
+        print("Final Parent 2 is " + str(parent2))  
     
 
 def modified_backtracking(numColors, backtrack_type = "simple"):
