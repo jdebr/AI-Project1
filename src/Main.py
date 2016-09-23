@@ -286,6 +286,13 @@ def init_graph_color(nb):
 def nb_conflicts(v, mat_adj) : 
     nb = 0
     for pts in range(len(graph)):
+        '''
+        print("-------------------")
+        print(mat_adj[v][pts])
+        print(color[v])
+        print(color[pts])
+        print("-------------------")
+        '''
         if mat_adj[v][pts] == 1 and color[v] == color[pts] : 
             nb= nb + 1
     conflicts[v] = nb
@@ -293,7 +300,10 @@ def nb_conflicts(v, mat_adj) :
 def tot_conflicts(mat_adj):
     for v in graph :
         nb_conflicts(v,mat_adj)
-    return sum(conflicts.itervalues())
+    tot_conf = 0
+    for v in conflicts : 
+        tot_conf = tot_conf + conflicts[v]
+    return tot_conf
 
     
 def test_csp(mat_adj): 
@@ -307,7 +317,7 @@ def minimize_conflicts(mat_adj, nb):
     print(color)
     nb_tot_conf = tot_conflicts(mat_adj)
     list_conf = conflicts
-    max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+    max_conf = max(conflicts.items(), key=operator.itemgetter(1))[0]
     print("conflicts " + str(conflicts))
     print("max_conf " + str(max_conf))
     col_max = color[max_conf]
@@ -319,9 +329,9 @@ def minimize_conflicts(mat_adj, nb):
     print(color)
     new_nb_tot_conf = tot_conflicts(mat_adj)
     print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
-    while new_nb_tot_conf >= nb_tot_conf : # or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:  
+    while new_nb_tot_conf >= nb_tot_conf  or conflicts[max(list_conf.items(), key=operator.itemgetter(1))[0]] != 0:  
         list_conf[max_conf] = 0
-        max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+        max_conf = max(conflicts.items(), key=operator.itemgetter(1))[0]
         print("*******************************************************")
         print("max_conf node # " + str(max_conf))
         print("color" + str(color))
@@ -331,13 +341,18 @@ def minimize_conflicts(mat_adj, nb):
         while col_max == new_col :
             new_col = random_color(nb)
         color[max_conf] = new_col
+        '''
+        changes by Shriyansh
+        '''
+        nb_tot_conf = new_nb_tot_conf
         new_nb_tot_conf = tot_conflicts(mat_adj)
         print("Old # conflicts: " + str(nb_tot_conf))
         print("New # conflicts: " + str(new_nb_tot_conf))
+        print("Color is " + str(color))
         
     
 def min_conflicts(max_it,nb) : 
-    mat_adj = creat_adgacent_matrix()
+    mat_adj = matrix_creation()
     init_graph_color(nb)
     for i in range(1, max_it) :
         if test_csp(mat_adj):
