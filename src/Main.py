@@ -71,14 +71,12 @@ OP_COUNT = 0
 # Counter to track number of times a node is assigned a color within an algorithm
 
 
-#Population array containing chromosome number as cell value
 population = defaultdict(list)
+#Population array containing chromosome number as cell value
 
-#chromosome containing node as index value and color as cell value. It can be a dictionary too.
-chromosome = []
 
-#Store the value of 2 random selected chromosome aka parent.
 tempParent = defaultdict(list)
+#Store the value of 2 random selected chromosome aka parent.
 
 #Actual Parents which store fit chromosome
 parent1 = []
@@ -288,6 +286,13 @@ def init_graph_color(nb):
 def nb_conflicts(v, mat_adj) : 
     nb = 0
     for pts in range(len(graph)):
+        '''
+        print("-------------------")
+        print(mat_adj[v][pts])
+        print(color[v])
+        print(color[pts])
+        print("-------------------")
+        '''
         if mat_adj[v][pts] == 1 and color[v] == color[pts] : 
             nb= nb + 1
     conflicts[v] = nb
@@ -295,7 +300,10 @@ def nb_conflicts(v, mat_adj) :
 def tot_conflicts(mat_adj):
     for v in graph :
         nb_conflicts(v,mat_adj)
-    return sum(conflicts.itervalues())
+    tot_conf = 0
+    for v in conflicts : 
+        tot_conf = tot_conf + conflicts[v]
+    return tot_conf
 
     
 def test_csp(mat_adj): 
@@ -309,7 +317,7 @@ def minimize_conflicts(mat_adj, nb):
     print(color)
     nb_tot_conf = tot_conflicts(mat_adj)
     list_conf = conflicts
-    max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+    max_conf = max(conflicts.items(), key=operator.itemgetter(1))[0]
     print("conflicts " + str(conflicts))
     print("max_conf " + str(max_conf))
     col_max = color[max_conf]
@@ -321,9 +329,9 @@ def minimize_conflicts(mat_adj, nb):
     print(color)
     new_nb_tot_conf = tot_conflicts(mat_adj)
     print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
-    while new_nb_tot_conf >= nb_tot_conf : # or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] == 0:  
+    while new_nb_tot_conf >= nb_tot_conf  or conflicts[max(list_conf.items(), key=operator.itemgetter(1))[0]] != 0:  
         list_conf[max_conf] = 0
-        max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
+        max_conf = max(conflicts.items(), key=operator.itemgetter(1))[0]
         print("*******************************************************")
         print("max_conf node # " + str(max_conf))
         print("color" + str(color))
@@ -333,13 +341,18 @@ def minimize_conflicts(mat_adj, nb):
         while col_max == new_col :
             new_col = random_color(nb)
         color[max_conf] = new_col
+        '''
+        changes by Shriyansh
+        '''
+        nb_tot_conf = new_nb_tot_conf
         new_nb_tot_conf = tot_conflicts(mat_adj)
         print("Old # conflicts: " + str(nb_tot_conf))
         print("New # conflicts: " + str(new_nb_tot_conf))
+        print("Color is " + str(color))
         
     
 def min_conflicts(max_it,nb) : 
-    mat_adj = creat_adgacent_matrix()
+    mat_adj = matrix_creation()
     init_graph_color(nb)
     for i in range(1, max_it) :
         if test_csp(mat_adj):
@@ -491,117 +504,107 @@ def checkAndAssignColor(nodeNumber,totalVertices, colorNumber):
 #End of Recursive Simple Back Tracking    
     
 #Start of Genetic Algorithm
+def genetic_algorithm(num_colors, max_iterations, population_size):
+    ''' The genetic algorithm from Russell & Norvig, pg 130.
+    Builds a population of randomized solutions to the graph 
+    coloring problem, selects individuals via a pairwise tournament
+    selection, then builds a new generation by pairing and crossing
+    over the winners, until a solution is found or max_iterations is reached.
+    '''
+    populationCreation(num_colors, population_size)
+    global population
+    global OP_COUNT
+    # Main algorithm loop
+    for i in range(max_iterations):
+        # Test for solution, return if it exists
+        for j in range(population_size):
+            if calculateFitness(population[j]) == 0:
+                OP_COUNT = i
+                return population[j]
+            
+        # If no solution, generate new population with GA
+        newPopulation = {}
+        # Loop to create new generation
+        for j in range(population_size):
+            # Select two individuals at random from population
+            x = population[random.randint(0, len(population)-1)]
+            y = population[random.randint(0, len(population)-1)]
+            # Pairwise tournament selection advances the fittest to crossover as parent 1
+            if calculateFitness(x) > calculateFitness(y):
+                parent1 = y
+            else:
+                parent1 = x 
+                
+            # Select two individuals at random from population
+            x = population[random.randint(0, len(population)-1)]
+            y = population[random.randint(0, len(population)-1)]
+            # Pairwise tournament selection advances the fittest to crossover as parent 2
+            if calculateFitness(x) > calculateFitness(y):
+                parent2 = y
+            else:
+                parent2 = x 
+                
+            child = reproduce(parent1, parent2)
+            
+            mutate(child, num_colors)
+            
+            newPopulation[j] = child
+            
+        population = newPopulation
+    # If max iterations reached, return false
+    return False        
+        
 
 def populationCreation(totalColor, noOfChromosome):
-    
-    
+    ''' Initializes a population of size noOfChromosome, consisting of randomized 
+    solutions to graph coloring problem, using a total number of colors totalColor.
+    '''
     for i in range(totalColor):
         listOfColor.append(i)
         
     for key in range(noOfChromosome):
-        if not chromosome:
-            for i in range(len(coords.items())):
-                chromosome.append(random.randrange(len(listOfColor))) 
+        chromosome = [random.randint(0, totalColor-1) for x in range(len(graph))]
+        population[key] = chromosome
         
-        else:
-            chromosome[:] = []
-            for i in range(len(coords.items())):
-                chromosome.append(random.randrange(len(listOfColor)))
-                
-        #print("Chromosome is ")
-        #print(chromosome)
-        for i in range(len(chromosome)):
-            population[key].append(chromosome[i])
-        
-     
-    print("Final Population is ")
-    print(population)
-    parentSelection(noOfChromosome)           
-        
-def parentSelection(noOfChromosome):
-    '''
-    We select two random temporary parents  from the chromosome and find the fitness and discard the unfit
-    and this process is repeated again for the selection of parent 2.
-    '''
 
-    tempPopulation = copy.deepcopy(population)
-    for i in range(2):
-        tempParent[i].append(random.randrange(len(tempPopulation)))
-        print(tempParent[i])
-        keyDeletion = removeBracketsMakeInt(tempParent[i])
-        tempPopulation.pop(keyDeletion)
-        
-    print("Temporary Parent List " + str(tempParent))
-    print("Temp Population " + str(tempPopulation))
+def calculateFitness(chromosome):
+    ''' Calculates the fitness score of an individual.  Our fitness function is the number of 
+    conflicts counted in the individual solution, which means our ideal fitness is 0 and higher
+    fitness scores are worse.
     '''
-    We need to calculate fitness of the selected parents and pop the fit one from the main population
+    fitness = 0
+    # Count number of conflicts in a solution.  A conflict is found if two nodes are adjacent in 
+    # the graph and they also have the same color.
+    for i in range(len(graph)):
+        for j in range(len(graph)):
+            if adjacent_matrix[i][j] == 1 and chromosome[i] == chromosome[j]:
+                fitness += 1
+    return fitness
+
+
+def reproduce(parent1, parent2):
+    ''' Combines two parent solutions into one new solution by splitting
+    each solution at a random index and appending the first [1 to index-1] values 
+    from parent1 to the [index to n] values from parent 2
     '''
-    calculateFitness(noOfChromosome)
+    index = random.randint(0, len(parent1)-1)
+    child = parent1[:index]
+    child[index:] = parent2[index:]
+    return child
 
-    
-def calculateFitness(noOfChromosome):
-    
-    sum = 0
-    for key, value in tempParent.items():
-        for graphKey, graphValue in graph.items():
-            for i in range(len(graph[graphKey])):
-                #since i need to go to particular value of population converting to int and removing braces. 
-                tempParentValue = removeBracketsMakeInt(tempParent[key])
-                if population[tempParentValue][graphKey] == population[tempParentValue][graph[graphKey][i]]:
-                    sum = sum + 1
-        print("Sum is " + str(sum))
-        fitness[key] = sum
-        #for second loop sum is zero
-        sum = 0
 
-    
-    print(tempParent[1])
-
-    print("Fitness of parents " + str(fitness))
-    if  fitness[0] > fitness[1]:
-        tempParentValue = removeBracketsMakeInt(tempParent[1])
-        if not parent1:
-            parent1.append(population[tempParentValue])
-        else:
-            parent2.append(population[tempParentValue])
-    else:
-        tempParentValue = removeBracketsMakeInt(tempParent[0]) 
-        if not parent1:
-            parent1.append(population[tempParentValue])
-        else:
-            parent2.append(population[tempParentValue])
+def mutate(child, num_colors):
+    ''' Changes color values in the string representing a solution, child, according to
+    some small probability.  Colors are selected from num_colors.  Returns child.
+    '''
+    p = 0.01
+    for i in range(len(child)):
+        r = random.random()
+        if r < p:
+            child[i] = random.randint(0,num_colors-1)
+    return child
             
-            
-    '''
-    Since we need to fill both parents so i call the parent function once more sing this
-    '''
-                    
-    if not parent1 or not parent2:
-        tempParent.clear()
-        fitness.clear()
-        print("*****************************")
-        print(fitness)
-        print("*****************************")
-        parentSelection(noOfChromosome)
-    else:
         
-        print("Final Parent 1 is " + str(parent1))
-        print("Final Parent 2 is " + str(parent2))  
-        SplitParents()
-
-def SplitParents():
-    newParents = []
-    nodeNumber = 0
-    for i in parent1:
-        for val in i:
-            if nodeNumber < (int((len(graph.items()))/2)):
-                newParents.append(val)
-                nodeNumber = nodeNumber + 1
-    for i in parent2:
-        for subval in i[nodeNumber:]:
-            newParents.append(subval)
-        
-    print("New Parents " + str(newParents))
 
 def removeBracketsMakeInt(toCovertValue):
         tempValue = toCovertValue
@@ -887,6 +890,7 @@ def unit_tests():
     
 def min_conflict_unit_test():
     tests_passed = True
+    global OP_COUNT
     # Successful coloring test
     for node1, v in graph.items():
         for node2 in v:
@@ -899,6 +903,29 @@ def min_conflict_unit_test():
         print("Unit tests successfully passed!")
         #print("Total Operations: ")
         #print(OP_COUNT)
+    else:
+        print("Unit tests failed!")
+        #print("Total Operations: ")
+        #print(OP_COUNT)
+        
+    OP_COUNT = 0
+    
+    
+def ga_unit_test(solution):
+    tests_passed = True
+    global OP_COUNT
+    # Successful coloring test
+    for node1, v in graph.items():
+        for node2 in v:
+            if solution[node1] == solution[node2]:
+                print("Adjacent nodes have same color!")
+                print("Node " + str(node1) + ": " + str(color[node1]) + ", Node " + str(node2)) + ": " + str(color[node2])
+                tests_passed = False
+                
+    if tests_passed:
+        print("Unit tests successfully passed!")
+        print("Number of Generations: ")
+        print(OP_COUNT)
     else:
         print("Unit tests failed!")
         #print("Total Operations: ")
@@ -1024,7 +1051,7 @@ def run_experiment_min_conflicts(num_colors):
         
         
 def run_experiment_genetic_algorithm(num_colors):
-    for i in range(1, 2):
+    for i in range(1, 11):
         num_points = i * 10
         # Scatter Points
         generate_points(num_points)
@@ -1046,8 +1073,12 @@ def run_experiment_genetic_algorithm(num_colors):
         print("Running GA - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
         print(get_time())
-        populationCreation(num_colors, 20)
+        solution = genetic_algorithm(num_colors, 10000, 30)
+        print(solution)
         print(get_time())
+        
+        if solution:
+            ga_unit_test(solution)
         
        
        
@@ -1057,11 +1088,11 @@ def main():
     #run_experiment_backtracking_forward_checking(3)
     #run_experiment_backtracking_forward_checking(4)
     #run_experiment_backtracking_MAC(3)
-    run_experiment_backtracking_MAC(4)
+    #run_experiment_backtracking_MAC(4)
     #run_experiment_min_conflicts(3)
     #run_experiment_min_conflicts(4)
     #run_experiment_genetic_algorithm(3)
-    #run_experiment_genetic_algorithm(4)
+    run_experiment_genetic_algorithm(4)
     pass
     
 if __name__ == '__main__':
