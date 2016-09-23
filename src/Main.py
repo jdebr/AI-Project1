@@ -824,26 +824,72 @@ def initialize_domains(numColors):
         for j in range(numColors):
             domains[i].append(j)
                    
-                              
+#Start of Graph Coloring Methods
+
 def plot_graph():
     print(coords)
     xval = []
     yval = []
-    for i in range(len(coords)):
-        xval.append(coords[i][0])
-        yval.append(coords[i][1])
-    py.plot(xval, yval, 'or')
-    
-    
     
     for pt, edges in graph.items():
         for pt2 in edges:
             xval = [coords[pt][0], coords[pt2][0]]
             yval = [coords[pt][1], coords[pt2][1]]
-            py.plot(xval, yval)
-    
+            py.plot(xval, yval,'k:')
+    py.title('Graph Coloring')
+    py.xlabel("X-Axis")
+    py.ylabel("Y-Axis")
+    for i in range(len(coords)):
+        xval[:]=[]
+        yval[:]=[] 
+        xval.append(coords[i][0])
+        yval.append(coords[i][1])
+        py.plot(xval, yval, marker='o',color=VertexColoringOtherAlgo(i), markersize = 10) 
     py.show()
     
+def VertexColoringOtherAlgo(key):
+    if colorNode[key][0] == 0:
+        return 'r'
+    elif colorNode[key][0] == 1:
+        return 'b'
+    elif colorNode[key][0] == 2:
+        return 'g'
+    else:
+        return 'y'
+        
+def plot_graph_minConflict():
+    print(coords)
+    xval = []
+    yval = []
+    
+    for pt, edges in graph.items():
+        for pt2 in edges:
+            xval = [coords[pt][0], coords[pt2][0]]
+            yval = [coords[pt][1], coords[pt2][1]]
+            py.plot(xval, yval,'k:')
+    py.title('Graph Coloring')
+    py.xlabel("X-Axis")
+    py.ylabel("Y-Axis")
+    for i in range(len(coords)):
+        xval[:]=[]
+        yval[:]=[] 
+        xval.append(coords[i][0])
+        yval.append(coords[i][1])
+        py.plot(xval, yval, marker='o',color=VertexColoring(i), markersize = 10) 
+    py.show()
+    
+    
+def VertexColoring(v):
+    if color[v] == 0 :
+        return 'r'
+    elif color[v] == 1 :
+        return 'b'
+    elif color[v] == 2 :
+        return 'g'
+    else : 
+        return 'y'
+        
+#End of Graph Display Methods    
     
 def get_time():
     return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
