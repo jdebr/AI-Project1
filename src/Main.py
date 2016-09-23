@@ -1058,7 +1058,7 @@ def run_experiment_genetic_algorithm(num_colors):
         print("Running GA - " + str(num_colors) + " colors, "+ str(num_points) + " points")
         #BackTracking(4)
         print(get_time())
-        solution = genetic_algorithm(num_colors, 1000, 20)
+        solution = genetic_algorithm(num_colors, 10000, 30)
         print(solution)
         print(get_time())
         
