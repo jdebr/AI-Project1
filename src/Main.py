@@ -257,7 +257,9 @@ def matrix_creation():
                 adjacent_matrix[random_point].append(1)
         available_nodes_coloring.remove(random_point)   
         
-        
+    return adjacent_matrix
+    
+    
 # START MIN CONFLICTS IMPORT
 def creat_adgacent_matrix():   
     #init adjacent matrix
@@ -344,7 +346,7 @@ def minimize_conflicts(mat_adj, nb):
         '''
         changes by Shriyansh
         '''
-        nb_tot_conf = new_nb_tot_conf
+        #nb_tot_conf = new_nb_tot_conf
         new_nb_tot_conf = tot_conflicts(mat_adj)
         print("Old # conflicts: " + str(nb_tot_conf))
         print("New # conflicts: " + str(new_nb_tot_conf))
