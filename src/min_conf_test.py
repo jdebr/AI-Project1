@@ -1,6 +1,7 @@
 import random
 import math
 import operator
+import time 
 from collections import defaultdict
 from sortedcontainers import SortedDict
 import matplotlib.pyplot as py
@@ -209,8 +210,9 @@ def init_graph_color(nb):
 #compute the number of conflicts for a vertex v and save it in the list conflicts
 def nb_conflicts(v, mat_adj) : 
     nb = 0
+    print "raw for vertex " + str(v) + " is : " + str(mat_adj[v])
     for pts in mat_adj[v]:
-        if color[v] == color[pts] and mat_adj[v][pts] == 1: 
+        if mat_adj[v][pts] == 1 and color[v] == color[pts] : 
             nb= nb + 1
     conflicts[v] = nb
 
@@ -231,6 +233,7 @@ def minimize_conflicts(mat_adj, nb):
     print "premiere matrix de col"
     print color
     nb_tot_conf = tot_conflicts(mat_adj)
+    print "nb conf init = " + str(nb_tot_conf)
     list_conf = conflicts
     max_conf = max(conflicts.iteritems(), key=operator.itemgetter(1))[0]
     print "conflicts " + str(conflicts)
@@ -244,9 +247,11 @@ def minimize_conflicts(mat_adj, nb):
     print color
     new_nb_tot_conf = tot_conflicts(mat_adj)
     print "nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf)
-    while new_nb_tot_conf >= nb_tot_conf or conflicts[max(conflicts.iteritems(), key=operator.itemgetter(1))[0]] != 0:
+    while new_nb_tot_conf >= nb_tot_conf or conflicts[max(list_conf.iteritems(), key=operator.itemgetter(1))[0]] != 0:
+        time.sleep(5)
         color[max_conf] = col_max
         list_conf[max_conf] = 0
+        print "list_conf = " + str(list_conf)
         max_conf = max(list_conf.iteritems(), key=operator.itemgetter(1))[0]
         print "max_conf " + str(max_conf)
         print "color" + str(color)
@@ -255,19 +260,29 @@ def minimize_conflicts(mat_adj, nb):
         new_col = random_color(nb)
         while col_max == new_col :
             new_col = random_color(nb)
+        color[max_conf] = new_col
         new_nb_tot_conf = tot_conflicts(mat_adj)
+    print "nb conf fin = " + str(new_nb_tot_conf)
         
     
 def min_conflicts(max_it,nb) : 
     mat_adj = creat_adgacent_matrix()
+    tot_conf = tot_conflicts(mat_adj)
+    print "tot_conf is " + str(tot_conf)
     init_graph_color(nb)
-    for i in range(1, max_it) :
-        minimize_conflicts(mat_adj, nb)
-        if test_csp(mat_adj):
-            print "Vrai"
-            return True
-    print "Failure"
-    return False
+    print color
+    if not test_csp : 
+        for i in range(1, max_it) :
+            minimize_conflicts(mat_adj, nb)
+            if test_csp(mat_adj):
+                print "Vrai"
+                return True
+        print "Failure"
+        return False
+    else :
+        print "Vrai"
+        return True		
+
     
     
 def unit_tests():
