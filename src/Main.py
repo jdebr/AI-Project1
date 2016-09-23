@@ -91,7 +91,6 @@ def generate_points(n):
     ''' Generates n sets of points randomly scattered on the 
     unit square and stores them as tuples mapped to integer IDs
     '''
-    coords.clear()
     
     for i in range(n):
         randX = random.randint(1, 1000000)
@@ -105,7 +104,6 @@ def calculate_distances():
     storing as a dictionary of lists of tuples, then sorting
     the lists by distance
     '''
-    distance.clear()
     
     for i in range(len(coords)):
         for j in range(i + 1, len(coords)):
@@ -237,7 +235,6 @@ def build_graph():
 
 def matrix_creation():
     '''This is the block where adjacency matrix is made'''
-    adjacent_matrix.clear()
     
     available_nodes_coloring = list(graph.keys())
     #print("Node's to Color " + str(available_nodes_coloring))
