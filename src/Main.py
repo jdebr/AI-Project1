@@ -257,7 +257,9 @@ def matrix_creation():
                 adjacent_matrix[random_point].append(1)
         available_nodes_coloring.remove(random_point)   
         
-        
+    return adjacent_matrix
+    
+    
 # START MIN CONFLICTS IMPORT
 def creat_adgacent_matrix():   
     #init adjacent matrix
