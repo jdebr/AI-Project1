@@ -126,7 +126,6 @@ def build_graph():
     ''' Add edges to graph by selecting a random point and adding 
     an edge to the nearest point that doesn't already have an edge
     and such that it will not cross any other edge'''
-    graph.clear()
     
     lines = []
     # List of existing line segments (edges on graph)
@@ -906,7 +905,7 @@ def unit_tests():
     
     # Graph creation test
     '''
-    for i in range(1000):
+    for i in range(10000):
         generate_points(3)
         calculate_distances()
         build_graph()
@@ -1167,6 +1166,7 @@ def test_runs():
     modified_backtracking(4, "simple")
     print("End time: " + str(get_time()))
     unit_tests()
+    plot_graph()
     
     
     print("##############################################################")
@@ -1183,6 +1183,7 @@ def test_runs():
     modified_backtracking(4, "forward") 
     print("End time: " + str(get_time()))
     unit_tests()
+    plot_graph()
     
     print("##############################################################")
     print("Running Backtracking w/ Forward Checking  - 3 colors, 10 points")
@@ -1258,6 +1259,7 @@ def main():
     #run_experiment_genetic_algorithm(3)
     #run_experiment_genetic_algorithm(4)
     test_runs()
+    #unit_tests()
     pass
     
 if __name__ == '__main__':
