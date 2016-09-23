@@ -15,6 +15,7 @@ import matplotlib.pyplot as py
 import copy
 import datetime
 import operator
+import pprint
 
 
 
@@ -315,29 +316,29 @@ def test_csp(mat_adj):
         return False
 
 def minimize_conflicts(mat_adj, nb):
-    print("premiere matrix de col / initial color matrix")
-    print(color)
+    #print("premiere matrix de col / initial color matrix")
+    #print(color)
     nb_tot_conf = tot_conflicts(mat_adj)
     list_conf = conflicts
     max_conf = max(conflicts.items(), key=operator.itemgetter(1))[0]
-    print("conflicts " + str(conflicts))
-    print("max_conf " + str(max_conf))
+    #print("conflicts " + str(conflicts))
+    #print("max_conf " + str(max_conf))
     col_max = color[max_conf]
     new_col = random_color(nb)
     while col_max == new_col :
         new_col = random_color(nb)
     color[max_conf] = new_col
-    print("deuxieme matrix de col / new color matrix")
-    print(color)
+    #print("deuxieme matrix de col / new color matrix")
+    #print(color)
     new_nb_tot_conf = tot_conflicts(mat_adj)
-    print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
+    #print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
     while new_nb_tot_conf >= nb_tot_conf  or conflicts[max(list_conf.items(), key=operator.itemgetter(1))[0]] != 0:  
         list_conf[max_conf] = 0
         max_conf = max(conflicts.items(), key=operator.itemgetter(1))[0]
-        print("*******************************************************")
-        print("max_conf node # " + str(max_conf))
-        print("color" + str(color))
-        print("color of node " + str(max_conf) + ": " + str(color[max_conf]))
+        #print("*******************************************************")
+        #print("max_conf node # " + str(max_conf))
+        #print("color" + str(color))
+        #print("color of node " + str(max_conf) + ": " + str(color[max_conf]))
         col_max = color[max_conf]
         new_col = random_color(nb)
         while col_max == new_col :
@@ -348,17 +349,18 @@ def minimize_conflicts(mat_adj, nb):
         '''
         #nb_tot_conf = new_nb_tot_conf
         new_nb_tot_conf = tot_conflicts(mat_adj)
-        print("Old # conflicts: " + str(nb_tot_conf))
-        print("New # conflicts: " + str(new_nb_tot_conf))
-        print("Color is " + str(color))
+        #print("Old # conflicts: " + str(nb_tot_conf))
+        #print("New # conflicts: " + str(new_nb_tot_conf))
+        #print("Color is " + str(color))
         
     
 def min_conflicts(max_it,nb) : 
-    #mat_adj = matrix_creation()
+    global OP_COUNT
     mat_adj = creat_adgacent_matrix()
     init_graph_color(nb)
     for i in range(1, max_it) :
         if test_csp(mat_adj):
+            OP_COUNT = i
             print("Vrai")
             return True
         minimize_conflicts(mat_adj, nb)
@@ -881,13 +883,15 @@ def unit_tests():
                 
     if tests_passed:
         print("Unit tests successfully passed!")
-        print("Total Operations: ")
+        print("Total operations as measured by node color assignments: ")
         print(OP_COUNT)
+        print("Final Color Assignments: {NodeID : [color]")
+        pprint.pprint(dict(colorNode))
     else:
         print("Unit tests failed!")
-        print("Total Operations: ")
+        print("Total operations as measured by node color assignments: ")
         print(OP_COUNT)
-        
+                
     OP_COUNT = 0
     
     
@@ -904,12 +908,14 @@ def min_conflict_unit_test():
                 
     if tests_passed:
         print("Unit tests successfully passed!")
-        #print("Total Operations: ")
-        #print(OP_COUNT)
+        print("Total Iterations: ")
+        print(OP_COUNT)
+        print("Final Color Assignments: {NodeID : [color]")
+        pprint.pprint(dict(color))
     else:
         print("Unit tests failed!")
-        #print("Total Operations: ")
-        #print(OP_COUNT)
+        print("Total Operations: ")
+        print(OP_COUNT)
         
     OP_COUNT = 0
     
@@ -931,8 +937,8 @@ def ga_unit_test(solution):
         print(OP_COUNT)
     else:
         print("Unit tests failed!")
-        #print("Total Operations: ")
-        #print(OP_COUNT)
+        print("Total Operations: ")
+        print(OP_COUNT)
         
     OP_COUNT = 0
     
@@ -1085,103 +1091,112 @@ def run_experiment_genetic_algorithm(num_colors):
             
             
 def test_runs():
+    print("Test runs to demonstrate algorithms running on a random 10 node planar graph")
     generate_points(10)
-    print("Coordinates:")
-    print(coords.items())
+    print("##############################################################")
+    print("Vertex Coordinates: (scaled up from unit square for readability and calculations)")
+    for node, coord in coords.items():
+        print("Node " + str(node) + ": " + str(coord))
     
     # Determine Euclidean Distances
     calculate_distances()
     
     # Connect Edges
     build_graph()
-    print("Graph: ")
-    print(graph)
+    print("##############################################################")
+    print("Graph: (undirected edges represented as a list of connected node IDs)")
+    for node, connections in graph.items():
+        print("Node " + str(node) + ": " + str(connections))
     
     # Create Adjacency Matrix
     matrix_creation()
     
     # BEGIN ALGORITHMS
+    print("##############################################################")
+    print("RESULTS OF RUNNING COLORING ALGORITHMS")
     # SIMPLE BACKTRACKING
     print("##############################################################")
     print("Running Simple Backtracking  - 4 colors, 10 points")
-    print(get_time())
-    print(modified_backtracking(4, "simple")) 
-    print(get_time())
+    print("Start time: " + str(get_time()))
+    modified_backtracking(4, "simple")
+    print("End time: " + str(get_time()))
     unit_tests()
+    
     
     print("##############################################################")
     print("Running Simple Backtracking  - 3 colors, 10 points")
-    print(get_time())
-    print(modified_backtracking(3, "simple")) 
-    print(get_time())
+    print("Start time: " + str(get_time()))
+    modified_backtracking(3, "simple")
+    print("End time: " + str(get_time()))
     unit_tests()
     
     # BACKTRACKING W/ FORWARD CHECKING
     print("##############################################################")
     print("Running Backtracking w/ Forward Checking  - 4 colors, 10 points")
-    print(get_time())
-    print(modified_backtracking(4, "forward")) 
-    print(get_time())
+    print("Start time: " + str(get_time()))
+    modified_backtracking(4, "forward") 
+    print("End time: " + str(get_time()))
     unit_tests()
     
     print("##############################################################")
     print("Running Backtracking w/ Forward Checking  - 3 colors, 10 points")
-    print(get_time())
-    print(modified_backtracking(3, "forward")) 
-    print(get_time())
+    print("Start time: " + str(get_time()))
+    modified_backtracking(3, "forward")
+    print("End time: " + str(get_time()))
     unit_tests()
     
     # BACKTRACKING W/ MAC
     print("##############################################################")
     print("Running Backtracking w/ MAC  - 4 colors, 10 points")
-    print(get_time())
-    print(modified_backtracking(4, "mac")) 
-    print(get_time())
+    print("Start time: " + str(get_time()))
+    modified_backtracking(4, "mac") 
+    print("End time: " + str(get_time()))
     unit_tests()
     
     print("##############################################################")
     print("Running Backtracking w/ MAC  - 3 colors, 10 points")
-    print(get_time())
-    print(modified_backtracking(3, "mac")) 
-    print(get_time())
+    print("Start time: " + str(get_time()))
+    modified_backtracking(3, "mac")
+    print("End time: " + str(get_time()))
     unit_tests()
-    
-    # MIN CONFLICTS
-    print("##############################################################")
-    print("Running Min Conflicts - 4 colors, 10 points")
-    print(get_time())
-    min_conflicts(1000, 4)
-    print(get_time())
-    min_conflict_unit_test()
-    
-    print("##############################################################")
-    print("Running Min Conflicts - 3 colors, 10 points")
-    print(get_time())
-    min_conflicts(1000, 3)
-    print(get_time())
-    min_conflict_unit_test()
-
-    
+       
     # GENETIC ALGORITHM
     print("##############################################################")
     print("Running Genetic Algorithm - 4 colors, 10 points")
     print("Population size - 30")
-    print(get_time())
+    print("Start time: " + str(get_time()))
     solution = genetic_algorithm(4, 10000, 30)
-    print(solution)
-    print(get_time())
+    print("End time: " + str(get_time()))
     if solution:
         ga_unit_test(solution)
+        print("Final Color Assignments indexed by Node ID:")
+        print(solution)
         
     print("##############################################################")
     print("Running Genetic Algorithm - 3 colors, 10 points")
     print("Population size - 30")
-    print(get_time())
+    print("Start time: " + str(get_time()))
     solution = genetic_algorithm(3, 10000, 30)
-    print(solution)
-    print(get_time())
+    print("End time: " + str(get_time()))
     if solution:
         ga_unit_test(solution)
+        print("Final Color Assignments indexed by Node ID:")
+        print(solution)
+        
+    # MIN CONFLICTS
+    print("##############################################################")
+    print("Running Min Conflicts - 4 colors, 10 points")
+    print("Start time: " + str(get_time()))
+    min_conflicts(1000, 4)
+    print("End time: " + str(get_time()))
+    min_conflict_unit_test()
+    
+    print("##############################################################")
+    print("Running Min Conflicts - 3 colors, 10 points")
+    print("Start time: " + str(get_time()))
+    min_conflicts(1000, 3)
+    print("End time: " + str(get_time()))
+    min_conflict_unit_test()
     
    
    
