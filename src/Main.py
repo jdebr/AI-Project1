@@ -15,7 +15,6 @@ import matplotlib.pyplot as py
 import copy
 import datetime
 import operator
-import pprint
 
 
 
@@ -515,12 +514,19 @@ def genetic_algorithm(num_colors, max_iterations, population_size):
     populationCreation(num_colors, population_size)
     global population
     global OP_COUNT
+    print("INITIAL POPULATION: ")
+    for id, individual in population.items():
+        print(individual)
+    print("***NEW POPULATION CREATION FOR GENERATION 2***")
     # Main algorithm loop
     for i in range(max_iterations):
         # Test for solution, return if it exists
         for j in range(population_size):
             if calculateFitness(population[j]) == 0:
                 OP_COUNT = i
+                print("Final Population: ")
+                for id, individual in population.items():
+                    print(individual)
                 return population[j]
             
         # If no solution, generate new population with GA
@@ -544,14 +550,24 @@ def genetic_algorithm(num_colors, max_iterations, population_size):
                 parent2 = y
             else:
                 parent2 = x 
-                
-            child = reproduce(parent1, parent2)
             
-            mutate(child, num_colors)
+            if i == 0:
+                child = reproduce(parent1, parent2, True)
+                mutate(child, num_colors, True)
+            else:
+                child = reproduce(parent1, parent2, False)
+                mutate(child, num_colors, False)
+            
+            
             
             newPopulation[j] = child
             
         population = newPopulation
+        if i == 0:
+            print("2ND GEN POPULATION: ")
+            for id, individual in population.items():
+                print(individual)
+            
     # If max iterations reached, return false
     return False        
         
@@ -583,7 +599,7 @@ def calculateFitness(chromosome):
     return fitness
 
 
-def reproduce(parent1, parent2):
+def reproduce(parent1, parent2, shouldPrint):
     ''' Combines two parent solutions into one new solution by splitting
     each solution at a random index and appending the first [1 to index-1] values 
     from parent1 to the [index to n] values from parent 2
@@ -591,10 +607,15 @@ def reproduce(parent1, parent2):
     index = random.randint(0, len(parent1)-1)
     child = parent1[:index]
     child[index:] = parent2[index:]
+    
+    if shouldPrint:
+        print("Parent 1: " + str(parent1))
+        print("Parent 2: " + str(parent2))
+        print("Child after crossover at index " + str(index) + ": " + str(child))
     return child
 
 
-def mutate(child, num_colors):
+def mutate(child, num_colors, shouldPrint):
     ''' Changes color values in the string representing a solution, child, according to
     some small probability.  Colors are selected from num_colors.  Returns child.
     '''
@@ -603,6 +624,8 @@ def mutate(child, num_colors):
         r = random.random()
         if r < p:
             child[i] = random.randint(0,num_colors-1)
+            if shouldPrint:
+                print("Mutation occurred at index " + str(i) + ", Child after mutation: " + str(child))
     return child
             
         
@@ -629,6 +652,7 @@ def modified_backtracking(numColors, backtrack_type = "simple"):
         colorNode[i] = []
     # Initialize domain values
     initialize_domains(numColors)
+    print("Initial Domains: " + str(domains))
     
     # Begin recursion
     return recursive_backtracking(numColors, backtrack_type)    
@@ -655,6 +679,7 @@ def recursive_backtracking(numColors, backtrack_type):
         if checkAndAssignColor(currentNode, len(graph), color):
             # Color the node 
             colorNode[currentNode].append(color)
+            print("Current Color Assignment: " + str(colorNode))
             # reduce the domain of that node to that color temporarily for MAC
             restoreColors = []
             for c in domains[currentNode]:
@@ -685,8 +710,8 @@ def recursive_backtracking(numColors, backtrack_type):
             for node, colors in inf[1].items():
                 for c in colors:
                     domains[node].append(c)
-            
         
+    print("Backtracking...")
     return False
 
 
@@ -715,6 +740,7 @@ def forward_check(nodeID, color):
             return (False, altered)
         
     # Otherwise keep domain changes and return true
+    print("Domains after inference:  " + str(domains))
     return (True, altered)
 
 
@@ -753,6 +779,7 @@ def mac(nodeID, color):
                 if adjacent_matrix[arc[0]][i] == 1 and not colorNode[i] and i != nodeID:
                     arcQueue.append((i, arc[0]))
                     
+    print("Domains after inference step: " + str(domains))
     return (True, altered)
 
 
@@ -927,8 +954,7 @@ def unit_tests():
         print("Unit tests successfully passed!")
         print("Total operations as measured by node color assignments: ")
         print(OP_COUNT)
-        print("Final Color Assignments: {NodeID : [color]")
-        pprint.pprint(dict(colorNode))
+        print("Final Color Assignments: " + str(colorNode))
     else:
         print("Unit tests failed!")
         print("Total operations as measured by node color assignments: ")
@@ -952,8 +978,7 @@ def min_conflict_unit_test():
         print("Unit tests successfully passed!")
         print("Total Iterations: ")
         print(OP_COUNT)
-        print("Final Color Assignments: {NodeID : [color]")
-        pprint.pprint(dict(color))
+        print("Final Color Assignments: " + str(color))
     else:
         print("Unit tests failed!")
         print("Total Operations: ")
@@ -1163,15 +1188,6 @@ def test_runs():
     modified_backtracking(4, "simple")
     print("End time: " + str(get_time()))
     unit_tests()
-    plot_graph()
-    
-    
-    print("##############################################################")
-    print("Running Simple Backtracking  - 3 colors, 10 points")
-    print("Start time: " + str(get_time()))
-    modified_backtracking(3, "simple")
-    print("End time: " + str(get_time()))
-    unit_tests()
     
     # BACKTRACKING W/ FORWARD CHECKING
     print("##############################################################")
@@ -1180,27 +1196,12 @@ def test_runs():
     modified_backtracking(4, "forward") 
     print("End time: " + str(get_time()))
     unit_tests()
-    plot_graph()
-    
-    print("##############################################################")
-    print("Running Backtracking w/ Forward Checking  - 3 colors, 10 points")
-    print("Start time: " + str(get_time()))
-    modified_backtracking(3, "forward")
-    print("End time: " + str(get_time()))
-    unit_tests()
     
     # BACKTRACKING W/ MAC
     print("##############################################################")
     print("Running Backtracking w/ MAC  - 4 colors, 10 points")
     print("Start time: " + str(get_time()))
     modified_backtracking(4, "mac") 
-    print("End time: " + str(get_time()))
-    unit_tests()
-    
-    print("##############################################################")
-    print("Running Backtracking w/ MAC  - 3 colors, 10 points")
-    print("Start time: " + str(get_time()))
-    modified_backtracking(3, "mac")
     print("End time: " + str(get_time()))
     unit_tests()
        
@@ -1216,29 +1217,11 @@ def test_runs():
         print("Final Color Assignments indexed by Node ID:")
         print(solution)
         
-    print("##############################################################")
-    print("Running Genetic Algorithm - 3 colors, 10 points")
-    print("Population size - 30")
-    print("Start time: " + str(get_time()))
-    solution = genetic_algorithm(3, 10000, 30)
-    print("End time: " + str(get_time()))
-    if solution:
-        ga_unit_test(solution)
-        print("Final Color Assignments indexed by Node ID:")
-        print(solution)
-        
     # MIN CONFLICTS
     print("##############################################################")
     print("Running Min Conflicts - 4 colors, 10 points")
     print("Start time: " + str(get_time()))
     min_conflicts(1000, 4)
-    print("End time: " + str(get_time()))
-    min_conflict_unit_test()
-    
-    print("##############################################################")
-    print("Running Min Conflicts - 3 colors, 10 points")
-    print("Start time: " + str(get_time()))
-    min_conflicts(1000, 3)
     print("End time: " + str(get_time()))
     min_conflict_unit_test()
     
@@ -1256,7 +1239,6 @@ def main():
     #run_experiment_genetic_algorithm(3)
     #run_experiment_genetic_algorithm(4)
     test_runs()
-    #unit_tests()
     pass
     
 if __name__ == '__main__':
