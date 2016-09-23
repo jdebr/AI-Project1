@@ -554,6 +554,7 @@ def genetic_algorithm(num_colors, max_iterations, population_size):
             if i == 0:
                 child = reproduce(parent1, parent2, True)
                 mutate(child, num_colors, True)
+                print("***")
             else:
                 child = reproduce(parent1, parent2, False)
                 mutate(child, num_colors, False)
@@ -741,6 +742,7 @@ def forward_check(nodeID, color):
         
     # Otherwise keep domain changes and return true
     print("Domains after inference:  " + str(domains))
+    print("***")
     return (True, altered)
 
 
@@ -779,7 +781,8 @@ def mac(nodeID, color):
                 if adjacent_matrix[arc[0]][i] == 1 and not colorNode[i] and i != nodeID:
                     arcQueue.append((i, arc[0]))
                     
-    print("Domains after inference step: " + str(domains))
+    print("Domains after inference  " + str(domains))
+    print("***")
     return (True, altered)
 
 
@@ -1161,7 +1164,7 @@ def test_runs():
     print("Test runs to demonstrate algorithms running on a random 10 node planar graph")
     generate_points(10)
     print("##############################################################")
-    print("Vertex Coordinates: (scaled up from unit square for readability and calculations)")
+    print("Vertex Coordinates: (scaled up from unit square for readability)")
     for node, coord in coords.items():
         print("Node " + str(node) + ": " + str(coord))
     
@@ -1208,9 +1211,9 @@ def test_runs():
     # GENETIC ALGORITHM
     print("##############################################################")
     print("Running Genetic Algorithm - 4 colors, 10 points")
-    print("Population size - 30")
+    print("Population size - 20")
     print("Start time: " + str(get_time()))
-    solution = genetic_algorithm(4, 10000, 30)
+    solution = genetic_algorithm(4, 1000, 20)
     print("End time: " + str(get_time()))
     if solution:
         ga_unit_test(solution)
