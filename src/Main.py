@@ -344,7 +344,7 @@ def minimize_conflicts(mat_adj, nb):
         '''
         changes by Shriyansh
         '''
-        nb_tot_conf = new_nb_tot_conf
+        #nb_tot_conf = new_nb_tot_conf
         new_nb_tot_conf = tot_conflicts(mat_adj)
         print("Old # conflicts: " + str(nb_tot_conf))
         print("New # conflicts: " + str(new_nb_tot_conf))
@@ -352,7 +352,8 @@ def minimize_conflicts(mat_adj, nb):
         
     
 def min_conflicts(max_it,nb) : 
-    mat_adj = matrix_creation()
+    #mat_adj = matrix_creation()
+    mat_adj = creat_adgacent_matrix()
     init_graph_color(nb)
     for i in range(1, max_it) :
         if test_csp(mat_adj):
@@ -1079,9 +1080,109 @@ def run_experiment_genetic_algorithm(num_colors):
         
         if solution:
             ga_unit_test(solution)
+            
+            
+def test_runs():
+    generate_points(10)
+    print("Coordinates:")
+    print(coords.items())
+    
+    # Determine Euclidean Distances
+    calculate_distances()
+    
+    # Connect Edges
+    build_graph()
+    print("Graph: ")
+    print(graph)
+    
+    # Create Adjacency Matrix
+    matrix_creation()
+    
+    # BEGIN ALGORITHMS
+    # SIMPLE BACKTRACKING
+    print("##############################################################")
+    print("Running Simple Backtracking  - 4 colors, 10 points")
+    print(get_time())
+    print(modified_backtracking(4, "simple")) 
+    print(get_time())
+    unit_tests()
+    
+    print("##############################################################")
+    print("Running Simple Backtracking  - 3 colors, 10 points")
+    print(get_time())
+    print(modified_backtracking(3, "simple")) 
+    print(get_time())
+    unit_tests()
+    
+    # BACKTRACKING W/ FORWARD CHECKING
+    print("##############################################################")
+    print("Running Backtracking w/ Forward Checking  - 4 colors, 10 points")
+    print(get_time())
+    print(modified_backtracking(4, "forward")) 
+    print(get_time())
+    unit_tests()
+    
+    print("##############################################################")
+    print("Running Backtracking w/ Forward Checking  - 3 colors, 10 points")
+    print(get_time())
+    print(modified_backtracking(3, "forward")) 
+    print(get_time())
+    unit_tests()
+    
+    # BACKTRACKING W/ MAC
+    print("##############################################################")
+    print("Running Backtracking w/ MAC  - 4 colors, 10 points")
+    print(get_time())
+    print(modified_backtracking(4, "mac")) 
+    print(get_time())
+    unit_tests()
+    
+    print("##############################################################")
+    print("Running Backtracking w/ MAC  - 3 colors, 10 points")
+    print(get_time())
+    print(modified_backtracking(3, "mac")) 
+    print(get_time())
+    unit_tests()
+    
+    # MIN CONFLICTS
+    print("##############################################################")
+    print("Running Min Conflicts - 4 colors, 10 points")
+    print(get_time())
+    min_conflicts(1000, 4)
+    print(get_time())
+    min_conflict_unit_test()
+    
+    print("##############################################################")
+    print("Running Min Conflicts - 3 colors, 10 points")
+    print(get_time())
+    min_conflicts(1000, 3)
+    print(get_time())
+    min_conflict_unit_test()
+
+    
+    # GENETIC ALGORITHM
+    print("##############################################################")
+    print("Running Genetic Algorithm - 4 colors, 10 points")
+    print("Population size - 30")
+    print(get_time())
+    solution = genetic_algorithm(4, 10000, 30)
+    print(solution)
+    print(get_time())
+    if solution:
+        ga_unit_test(solution)
         
-       
-       
+    print("##############################################################")
+    print("Running Genetic Algorithm - 3 colors, 10 points")
+    print("Population size - 30")
+    print(get_time())
+    solution = genetic_algorithm(3, 10000, 30)
+    print(solution)
+    print(get_time())
+    if solution:
+        ga_unit_test(solution)
+    
+   
+   
 def main():
     #run_experiment_simple_backtracking(3)
     #run_experiment_simple_backtracking(4)
@@ -1092,7 +1193,8 @@ def main():
     #run_experiment_min_conflicts(3)
     #run_experiment_min_conflicts(4)
     #run_experiment_genetic_algorithm(3)
-    run_experiment_genetic_algorithm(4)
+    #run_experiment_genetic_algorithm(4)
+    test_runs()
     pass
     
 if __name__ == '__main__':
