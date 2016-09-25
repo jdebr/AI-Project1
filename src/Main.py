@@ -294,6 +294,7 @@ def nb_conflicts(v, mat_adj) :
         if mat_adj[v][pts] == 1 and color[v] == color[pts] : 
             nb= nb + 1
     conflicts[v] = nb
+    #print("Conflict List is " + str(conflicts))
     
 def tot_conflicts(mat_adj):
     for v in graph :
@@ -301,6 +302,7 @@ def tot_conflicts(mat_adj):
     tot_conf = 0
     for v in conflicts : 
         tot_conf = tot_conf + conflicts[v]
+    print("Total Conflicts " + str(tot_conf))
     return tot_conf
 
     
@@ -311,9 +313,11 @@ def test_csp(mat_adj):
         return False
 
 def minimize_conflicts(mat_adj, nb):
-    #print("premiere matrix de col / initial color matrix")
+    print("Conflicts List is " + str(conflicts))
+    print("Initial color matrix " + str(color))
     #print(color)
     nb_tot_conf = tot_conflicts(mat_adj)
+    
     list_conf = conflicts
     max_conf = max(conflicts.items(), key=operator.itemgetter(1))[0]
     #print("conflicts " + str(conflicts))
@@ -323,7 +327,7 @@ def minimize_conflicts(mat_adj, nb):
     while col_max == new_col :
         new_col = random_color(nb)
     color[max_conf] = new_col
-    #print("deuxieme matrix de col / new color matrix")
+    print("New color matrix " + str(color))
     #print(color)
     new_nb_tot_conf = tot_conflicts(mat_adj)
     #print("nb_tot_conf est " + str(nb_tot_conf) + "    new_nb_tot_conf est " + str(new_nb_tot_conf))
@@ -344,9 +348,9 @@ def minimize_conflicts(mat_adj, nb):
         '''
         #nb_tot_conf = new_nb_tot_conf
         new_nb_tot_conf = tot_conflicts(mat_adj)
-        #print("Old # conflicts: " + str(nb_tot_conf))
-        #print("New # conflicts: " + str(new_nb_tot_conf))
-        #print("Color is " + str(color))
+        print("Old # conflicts: " + str(nb_tot_conf))
+        print("New # conflicts: " + str(new_nb_tot_conf))
+        print("Color is " + str(color))
         
     
 def min_conflicts(max_it,nb) : 
@@ -853,25 +857,29 @@ def initialize_domains(numColors):
 #Start of Graph Coloring Methods
 
 def plot_graph():
-    print(coords)
-    xval = []
-    yval = []
-    
-    for pt, edges in graph.items():
-        for pt2 in edges:
-            xval = [coords[pt][0], coords[pt2][0]]
-            yval = [coords[pt][1], coords[pt2][1]]
-            py.plot(xval, yval,'k:')
-    py.title('Graph Coloring')
-    py.xlabel("X-Axis")
-    py.ylabel("Y-Axis")
-    for i in range(len(coords)):
-        xval[:]=[]
-        yval[:]=[] 
-        xval.append(coords[i][0])
-        yval.append(coords[i][1])
-        py.plot(xval, yval, marker='o',color=VertexColoringOtherAlgo(i), markersize = 10) 
-    py.show()
+    if not colorNode:
+        print("No Graph!!")
+    else: 
+        print(coords)
+        xval = []
+        yval = []
+        
+        for pt, edges in graph.items():
+            for pt2 in edges:
+                xval = [coords[pt][0], coords[pt2][0]]
+                yval = [coords[pt][1], coords[pt2][1]]
+                py.plot(xval, yval,'k:')
+        py.title('Graph Coloring')
+        py.xlabel("X-Axis")
+        py.ylabel("Y-Axis")
+        
+        for i in range(len(coords)):
+            xval[:]=[]
+            yval[:]=[] 
+            xval.append(coords[i][0])
+            yval.append(coords[i][1])
+            py.plot(xval, yval, marker='o',color=VertexColoringOtherAlgo(i), markersize = 10) 
+        py.show()
     
 def VertexColoringOtherAlgo(key):
     if colorNode[key][0] == 0:
@@ -884,25 +892,28 @@ def VertexColoringOtherAlgo(key):
         return 'y'
         
 def plot_graph_minConflict():
-    print(coords)
-    xval = []
-    yval = []
-    
-    for pt, edges in graph.items():
-        for pt2 in edges:
-            xval = [coords[pt][0], coords[pt2][0]]
-            yval = [coords[pt][1], coords[pt2][1]]
-            py.plot(xval, yval,'k:')
-    py.title('Graph Coloring')
-    py.xlabel("X-Axis")
-    py.ylabel("Y-Axis")
-    for i in range(len(coords)):
-        xval[:]=[]
-        yval[:]=[] 
-        xval.append(coords[i][0])
-        yval.append(coords[i][1])
-        py.plot(xval, yval, marker='o',color=VertexColoring(i), markersize = 10) 
-    py.show()
+    if not color:
+        print("No Graph!!")
+    else:
+        print(coords)
+        xval = []
+        yval = []
+        
+        for pt, edges in graph.items():
+            for pt2 in edges:
+                xval = [coords[pt][0], coords[pt2][0]]
+                yval = [coords[pt][1], coords[pt2][1]]
+                py.plot(xval, yval,'k:')
+        py.title('Graph Coloring')
+        py.xlabel("X-Axis")
+        py.ylabel("Y-Axis")
+        for i in range(len(coords)):
+            xval[:]=[]
+            yval[:]=[] 
+            xval.append(coords[i][0])
+            yval.append(coords[i][1])
+            py.plot(xval, yval, marker='o',color=VertexColoring(i), markersize = 10) 
+        py.show()
     
     
 def VertexColoring(v):
@@ -1038,7 +1049,7 @@ def run_experiment_simple_backtracking(num_colors):
         print(get_time())
         print(modified_backtracking(num_colors, "simple")) 
         print(get_time())
-        
+        #plot_graph()
         unit_tests()
         
         
@@ -1190,6 +1201,7 @@ def test_runs():
     print("Start time: " + str(get_time()))
     modified_backtracking(4, "simple")
     print("End time: " + str(get_time()))
+    plot_graph()
     unit_tests()
     
     # BACKTRACKING W/ FORWARD CHECKING
@@ -1228,8 +1240,48 @@ def test_runs():
     print("End time: " + str(get_time()))
     min_conflict_unit_test()
     
-   
-   
+def finalExperiments():
+    print("#######################################")
+    print("Final Experiment for Report")
+    print("#######################################")
+    
+    print("Number of Colors 3 with number of nodes starting from 10 and increasing till 100")
+    run_experiment_simple_backtracking(3)
+    
+    #We comment each line after it finished or stopped
+    print("Number of Colors 4 with number of nodes starting from 10 and increasing till 100")      
+    run_experiment_simple_backtracking(4)
+    
+    
+    print("Number of Colors 3 with number of nodes starting from 10 and increasing till 100")
+    run_experiment_backtracking_forward_checking(3)
+    #We comment each line after it finished or stopped
+    print("Number of Colors 4 with number of nodes starting from 10 and increasing till 100")      
+    run_experiment_backtracking_forward_checking(4)
+    
+    
+    print("Number of Colors 3 with number of nodes starting from 10 and increasing till 100")
+    run_experiment_backtracking_MAC(3)
+    #We comment each line after it finished or stopped
+    print("Number of Colors 4 with number of nodes starting from 10 and increasing till 100")      
+    run_experiment_backtracking_MAC(4)
+    
+      
+    print("Number of Colors 3 with number of nodes starting from 10 and increasing till 100")
+    run_experiment_min_conflicts(3)
+    #We comment each line after it finished or stopped
+    print("Number of Colors 4 with number of nodes starting from 10 and increasing till 100")      
+    run_experiment_min_conflicts(4)
+    
+    
+    print("Number of Colors 3 with number of nodes starting from 10 and increasing till 100")
+    run_experiment_genetic_algorithm(3)
+    #We comment each line after it finished or stopped
+    print("Number of Colors 4 with number of nodes starting from 10 and increasing till 100")      
+    run_experiment_genetic_algorithm(4)
+    
+    
+    
 def main():
     #run_experiment_simple_backtracking(3)
     #run_experiment_simple_backtracking(4)
@@ -1241,7 +1293,8 @@ def main():
     #run_experiment_min_conflicts(4)
     #run_experiment_genetic_algorithm(3)
     #run_experiment_genetic_algorithm(4)
-    test_runs()
+    #test_runs()
+    finalExperiments()
     pass
     
 if __name__ == '__main__':
