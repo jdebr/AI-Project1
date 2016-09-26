@@ -1,0 +1,44 @@
+10 nodes, 4 colors
+##############################################################
+RESULTS OF RUNNING COLORING ALGORITHMS
+##############################################################
+Running Simple Backtracking  - 4 colors, 10 points
+Start time: 2016-09-25 22:13:30
+End time: 2016-09-25 22:13:30
+Coloring Completed!
+Total operations as measured by node color assignments: 
+10
+Final Color Assignments: defaultdict(<class 'list'>, {0: [2], 1: [1], 2: [3], 3: [2], 4: [3], 5: [0], 6: [2], 7: [1], 8: [1], 9: [0]})
+##############################################################
+Running Backtracking w/ Forward Checking  - 4 colors, 10 points
+Start time: 2016-09-25 22:13:47
+End time: 2016-09-25 22:13:47
+Coloring Completed!
+Total operations as measured by node color assignments: 
+10
+Final Color Assignments: defaultdict(<class 'list'>, {0: [2], 1: [1], 2: [3], 3: [2], 4: [0], 5: [1], 6: [2], 7: [1], 8: [1], 9: [0]})
+##############################################################
+Running Backtracking w/ MAC  - 4 colors, 10 points
+Start time: 2016-09-25 22:13:47
+End time: 2016-09-25 22:13:47
+Coloring Completed!
+Total operations as measured by node color assignments: 
+10
+Final Color Assignments: defaultdict(<class 'list'>, {0: [2], 1: [1], 2: [3], 3: [2], 4: [0], 5: [1], 6: [2], 7: [1], 8: [1], 9: [0]})
+##############################################################
+Running Genetic Algorithm - 4 colors, 10 points
+Population size - 20
+Start time: 2016-09-25 22:13:47
+End time: 2016-09-25 22:13:48
+Number of Generations: 
+32
+Final Color Assignments indexed by Node ID:
+[1, 2, 1, 0, 3, 1, 0, 2, 2, 3]
+##############################################################
+Running Min Conflicts - 4 colors, 10 points
+Start time: 2016-09-25 22:13:48
+End time: 2016-09-25 22:13:48
+Total Conflicts 24
+Total Iterations: 
+2
+Final Color Assignments: {0: 3, 1: 0, 2: 2, 3: 3, 4: 1, 5: 2, 6: 3, 7: 0, 8: 0, 9: 1}
